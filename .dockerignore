@@ -13,5 +13,3 @@ Dockerfile
 docker-compose*.yaml
 README.md
 GEMINI.md
-uv.lock
-pyproject.toml

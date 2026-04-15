@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Almoxarifado{% endblock %}
+
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
+        <div class="bg-blue-100 p-3 rounded-lg text-blue-600 text-2xl">📦</div>
+        <div>
+            <p class="text-sm text-gray-500 font-medium">Produtos em Catálogo</p>
+            <p class="text-2xl font-bold text-gray-800">{{ total_produtos }}</p>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
+        <div class="bg-yellow-100 p-3 rounded-lg text-yellow-600 text-2xl">⏳</div>
+        <div>
+            <p class="text-sm text-gray-500 font-medium">Pedidos Reservados</p>
+            <p class="text-2xl font-bold text-gray-800">{{ pedidos_reservados }}</p>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
+        <div class="bg-green-100 p-3 rounded-lg text-green-600 text-2xl">✅</div>
+        <div>
+            <p class="text-sm text-gray-500 font-medium">Entregas Realizadas</p>
+            <p class="text-2xl font-bold text-gray-800">{{ entregas_realizadas }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Estoque Crítico -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-50 flex justify-between items-center">
+            <h3 class="font-bold text-gray-700">⚠️ Alerta de Estoque Crítico</h3>
+            <span class="px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">{{ estoque_critico.count }} itens</span>
+        </div>
+        <div class="divide-y divide-gray-50">
+            {% for produto in estoque_critico %}
+            <div class="px-6 py-4 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-gray-800">{{ produto.nome }}</p>
+                    <p class="text-xs text-gray-500">{{ produto.categoria.nome }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-bold text-red-600">{{ produto.estoque_atual }} {{ produto.unidade_medida }}</p>
+                    <p class="text-xs text-gray-400">Mín: {{ produto.estoque_minimo }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <div class="px-6 py-8 text-center text-gray-400">
+                <p>Nenhum produto com estoque crítico.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pedidos Recentes -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-50 flex justify-between items-center">
+            <h3 class="font-bold text-gray-700">📋 Pedidos Recentes</h3>
+            <a href="{% url 'pedido_list' %}" class="text-blue-600 text-xs font-bold hover:underline">Ver todos</a>
+        </div>
+        <div class="divide-y divide-gray-50">
+            {% for pedido in pedidos_recentes %}
+            <a href="{% url 'pedido_detail' pedido.pk %}" class="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition">
+                <div>
+                    <p class="text-sm font-semibold text-gray-800">{{ pedido.secretaria }}</p>
+                    <p class="text-xs text-gray-500">{{ pedido.data_pedido|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div class="text-right">
+                    <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase
+                        {% if pedido.status == 'ENTREGUE' %}bg-green-100 text-green-700
+                        {% elif pedido.status == 'RESERVADO' %}bg-yellow-100 text-yellow-700
+                        {% elif pedido.status == 'SOLICITADO' %}bg-blue-100 text-blue-700
+                        {% else %}bg-gray-100 text-gray-700{% endif %}">
+                        {{ pedido.get_status_display }}
+                    </span>
+                </div>
+            </a>
+            {% empty %}
+            <div class="px-6 py-8 text-center text-gray-400">
+                <p>Nenhum pedido registrado.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

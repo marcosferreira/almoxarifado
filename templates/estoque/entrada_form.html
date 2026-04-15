@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Nova Entrada - Almoxarifado{% endblock %}
+
+{% block breadcrumb %}Entradas > Registrar Nova{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Registrar Entrada de Estoque</h2>
+        <p class="text-sm text-gray-500">Informe os dados da nota fiscal e os itens recebidos.</p>
+    </div>
+
+    <form method="post" class="space-y-8">
+        {% csrf_token %}
+        
+        <!-- Dados da Entrada -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">📦 Dados da Nota/Mestre</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label>{{ entrada_form.fornecedor.label }}</label>
+                    {{ entrada_form.fornecedor }}
+                </div>
+                <div>
+                    <label>{{ entrada_form.numero_nota.label }}</label>
+                    {{ entrada_form.numero_nota }}
+                </div>
+                <div class="md:col-span-2">
+                    <label>{{ entrada_form.observacoes.label }}</label>
+                    {{ entrada_form.observacoes }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Itens da Entrada -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 overflow-hidden" x-data="itemManager()">
+            <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">📝 Itens da Entrada</h3>
+            
+            {{ formset.management_form }}
+            
+            <table class="min-w-full divide-y divide-gray-200" id="item-table">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Produto</th>
+                        <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase w-32">Quantidade</th>
+                        <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase w-40">Preço Unit.</th>
+                        <th class="px-4 py-2 text-center text-xs font-bold text-gray-500 uppercase w-16">Remover</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for form in formset %}
+                    <tr class="item-form">
+                        <td class="px-2 py-3">
+                            {{ form.id }}
+                            {{ form.produto }}
+                            {% if form.produto.errors %}
+                            <p class="text-[10px] text-red-600 font-medium">{{ form.produto.errors.0 }}</p>
+                            {% endif %}
+                        </td>
+                        <td class="px-2 py-3">
+                            {{ form.quantidade }}
+                        </td>
+                        <td class="px-2 py-3">
+                            {{ form.preco_unitario }}
+                        </td>
+                        <td class="px-2 py-3 text-center">
+                            {{ form.DELETE }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="mt-4 flex justify-between items-center">
+                <p class="text-xs text-gray-400">* Preencha todos os campos obrigatórios.</p>
+                <div class="flex space-x-3">
+                    <a href="{% url 'entrada_list' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+                        Finalizar Entrada
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function itemManager() {
+        return {
+            // Futuras melhorias dinâmicas com Alpine podem ser adicionadas aqui
+        };
+    }
+</script>
+{% endblock %}

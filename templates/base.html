@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Almoxarifado - Dona Inês{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style type="text/tailwindcss">
+        @layer base {
+            input[type="text"], 
+            input[type="number"], 
+            input[type="password"], 
+            input[type="email"], 
+            input[type="url"], 
+            input[type="date"], 
+            input[type="datetime-local"], 
+            select, 
+            textarea {
+                @apply mt-1 block w-full px-2 py-1.5 bg-white border border-gray-300 rounded shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-xs transition duration-150 ease-in-out;
+            }
+            input[type="checkbox"] {
+                @apply rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4;
+            }
+            input[type="file"] {
+                @apply mt-1 block w-full text-xs text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition duration-150 ease-in-out;
+            }
+            label {
+                @apply block text-[10px] font-bold text-gray-500 uppercase mb-0.5 tracking-tight;
+            }
+        }
+        @layer components {
+            .btn-erp {
+                @apply flex flex-col items-center justify-center p-2 rounded border border-gray-300 bg-gray-50 text-gray-700 hover:bg-white hover:border-blue-500 hover:text-blue-600 transition shadow-sm text-[10px] font-bold uppercase w-full;
+            }
+            .btn-erp span:first-child {
+                @apply text-lg mb-1;
+            }
+            .btn-erp span:last-child {
+                @apply block text-[9px] text-gray-400 mt-1;
+            }
+        }
+    </style>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col md:flex-row" x-data="{ sidebarOpen: false }">
+    <!-- Sidebar -->
+    <aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}" 
+           class="fixed inset-y-0 left-0 z-50 w-48 bg-[#1e293b] text-white transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 shadow-xl border-r border-gray-700">
+        <div class="p-4 bg-[#0f172a]">
+            <h1 class="text-lg font-black flex items-center space-x-2 italic tracking-tighter">
+                <span class="text-blue-400">ALMOX</span>
+                <span class="text-gray-400 text-xs font-normal not-italic">v1.0</span>
+            </h1>
+            <p class="text-[9px] text-blue-300 font-bold uppercase tracking-widest mt-1 opacity-70">PM Dona Inês - PB</p>
+        </div>
+        
+        <nav class="mt-4 px-2 space-y-0.5">
+            <a href="{% url 'dashboard' %}" class="flex items-center space-x-2 p-2 rounded hover:bg-blue-600 transition text-[11px] font-bold uppercase {% if request.resolver_match.url_name == 'dashboard' %}bg-blue-600{% endif %}">
+                <span class="w-4">🏠</span><span>Início</span>
+            </a>
+            <div class="pt-4 pb-1 px-2 text-[9px] font-black text-gray-500 uppercase tracking-widest">Cadastros</div>
+            <a href="{% url 'produto_list' %}" class="flex items-center space-x-2 p-2 rounded hover:bg-blue-600 transition text-[11px] font-bold uppercase {% if 'produto' in request.path %}bg-blue-600{% endif %}">
+                <span class="w-4">📦</span><span>Produtos</span>
+            </a>
+            <a href="{% url 'fornecedor_list' %}" class="flex items-center space-x-2 p-2 rounded hover:bg-blue-600 transition text-[11px] font-bold uppercase {% if 'fornecedor' in request.path %}bg-blue-600{% endif %}">
+                <span class="w-4">🤝</span><span>Fornecedores</span>
+            </a>
+            
+            <div class="pt-4 pb-1 px-2 text-[9px] font-black text-gray-500 uppercase tracking-widest">Movimentação</div>
+            <a href="{% url 'entrada_list' %}" class="flex items-center space-x-2 p-2 rounded hover:bg-blue-600 transition text-[11px] font-bold uppercase {% if 'entrada' in request.path %}bg-blue-600{% endif %}">
+                <span class="w-4">📥</span><span>Entradas</span>
+            </a>
+            <a href="{% url 'pedido_list' %}" class="flex items-center space-x-2 p-2 rounded hover:bg-blue-600 transition text-[11px] font-bold uppercase {% if 'pedido' in request.path %}bg-blue-600{% endif %}">
+                <span class="w-4">📋</span><span>Pedidos</span>
+            </a>
+            
+            <div class="pt-4 pb-1 px-2 text-[9px] font-black text-gray-500 uppercase tracking-widest">Sistema</div>
+            <a href="{% url 'relatorios' %}" class="flex items-center space-x-2 p-2 rounded hover:bg-blue-600 transition text-[11px] font-bold uppercase {% if 'relatorios' in request.path %}bg-blue-600{% endif %}">
+                <span class="w-4">📊</span><span>Relatórios</span>
+            </a>
+        </nav>
+
+        <div class="absolute bottom-0 w-full p-4 border-t border-blue-800">
+            <div class="flex items-center space-x-3 px-2 py-3">
+                <div class="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center font-bold">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-sm font-medium truncate">{{ user.username }}</p>
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="text-xs text-blue-400 hover:text-white">Sair do sistema</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <!-- Header -->
+        <header class="bg-white shadow-sm h-10 flex items-center justify-between px-4 border-b border-gray-200">
+            <div class="flex items-center space-x-4">
+                <button @click="sidebarOpen = !sidebarOpen" class="md:hidden p-1 rounded hover:bg-gray-100">
+                    <svg class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest flex items-center space-x-2">
+                    <span>SISTEMA DE GESTÃO DE ALMOXARIFADO</span>
+                    <span class="text-gray-200">|</span>
+                    <span class="text-blue-500">{% block breadcrumb %}{% endblock %}</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4 text-[10px] font-bold text-gray-500">
+                <span class="hidden sm:inline">TERMINAL: 001</span>
+                <span class="text-gray-300">|</span>
+                <span>{% now "d/m/Y H:i" %}</span>
+            </div>
+        </header>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="px-4 md:px-8 mt-4 space-y-2">
+            {% for message in messages %}
+            <div class="p-4 rounded-md shadow-sm {% if message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <main class="flex-1 overflow-y-auto p-4 md:p-8">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

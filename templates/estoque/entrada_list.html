@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Entradas - Almoxarifado{% endblock %}
+
+{% block breadcrumb %}Entradas{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Histórico de Entradas</h2>
+        <p class="text-sm text-gray-500">Registro de todas as notas fiscais e materiais recebidos.</p>
+    </div>
+    <div class="flex items-center space-x-3">
+        <a href="{% url 'entrada_create' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium flex items-center space-x-2">
+            <span>📥</span><span>Registrar Entrada</span>
+        </a>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Data</th>
+                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Fornecedor</th>
+                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Nota Fiscal</th>
+                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Itens</th>
+                <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase">Ações</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for entrada in entradas %}
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {{ entrada.data_entrada|date:"d/m/Y" }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-bold text-gray-900">{{ entrada.fornecedor.nome_fantasia }}</div>
+                    <div class="text-[10px] text-gray-500">{{ entrada.fornecedor.cnpj }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
+                    {{ entrada.numero_nota|default:"S/N" }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ entrada.itens.count }} itens
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button class="text-blue-600 hover:text-blue-900 font-bold">Ver Itens</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="px-6 py-12 text-center text-gray-500">Nenhuma entrada registrada.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

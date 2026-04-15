@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Fornecedores - Almoxarifado{% endblock %}
+
+{% block breadcrumb %}Fornecedores{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Fornecedores Parceiros</h2>
+        <p class="text-sm text-gray-500">Gestão de empresas que fornecem materiais para a prefeitura.</p>
+    </div>
+    <div class="flex items-center space-x-3">
+        <a href="{% url 'fornecedor_create' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium flex items-center space-x-2">
+            <span>➕</span><span>Novo Fornecedor</span>
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for fornecedor in fornecedores %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:border-blue-300 transition group">
+        <div class="flex items-start justify-between mb-4">
+            <div class="bg-blue-50 p-3 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
+                🏢
+            </div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">CNPJ: {{ fornecedor.cnpj }}</span>
+        </div>
+        <h3 class="text-lg font-bold text-gray-800 truncate">{{ fornecedor.nome_fantasia }}</h3>
+        <p class="text-sm text-gray-500 truncate mb-4">{{ fornecedor.razao_social }}</p>
+        
+        <div class="space-y-2 border-t pt-4">
+            <div class="flex items-center text-xs text-gray-600">
+                <span class="w-6">👤</span>
+                <span class="truncate">{{ fornecedor.contato|default:"Não informado" }}</span>
+            </div>
+            <div class="flex items-center text-xs text-gray-600">
+                <span class="w-6">📞</span>
+                <span>{{ fornecedor.telefone|default:"Não informado" }}</span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full py-12 text-center bg-white rounded-xl border-2 border-dashed border-gray-200 text-gray-400">
+        Nenhum fornecedor cadastrado.
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

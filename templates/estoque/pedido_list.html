@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Pedidos - Almoxarifado{% endblock %}
+
+{% block breadcrumb %}Pedidos{% endblock %}
+
+{% block content %}
+<div class="mb-4 flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+        <span class="text-blue-600">📂</span>
+        <h2 class="text-sm font-black text-gray-700 uppercase tracking-tighter">Consulta de Pedidos</h2>
+    </div>
+    <div class="flex items-center space-x-2">
+        <a href="{% url 'pedido_create' %}" class="bg-blue-600 text-white px-3 py-1 rounded text-[10px] font-bold uppercase hover:bg-blue-700 transition">
+            Incluir Novo [F2]
+        </a>
+    </div>
+</div>
+
+<!-- Filtros Rápidos (ERP Style) -->
+<div class="flex items-center space-x-1 mb-4 p-1 bg-gray-100 rounded border border-gray-200">
+    <a href="{% url 'pedido_list' %}" class="px-3 py-1 text-[10px] font-bold rounded {% if not request.GET.status %}bg-white text-blue-700 shadow-sm border border-gray-300{% else %}text-gray-500 hover:text-gray-700{% endif %}">TODOS</a>
+    <span class="text-gray-300">|</span>
+    <a href="?status=SOLICITADO" class="px-3 py-1 text-[10px] font-bold rounded {% if request.GET.status == 'SOLICITADO' %}bg-white text-blue-700 shadow-sm border border-gray-300{% else %}text-gray-500 hover:text-gray-700{% endif %}">SOLICITADOS</a>
+    <span class="text-gray-300">|</span>
+    <a href="?status=RESERVADO" class="px-3 py-1 text-[10px] font-bold rounded {% if request.GET.status == 'RESERVADO' %}bg-white text-yellow-700 shadow-sm border border-gray-300{% else %}text-gray-500 hover:text-gray-700{% endif %}">RESERVADOS</a>
+    <span class="text-gray-300">|</span>
+    <a href="?status=EMPENHADO" class="px-3 py-1 text-[10px] font-bold rounded {% if request.GET.status == 'EMPENHADO' %}bg-white text-purple-700 shadow-sm border border-gray-300{% else %}text-gray-500 hover:text-gray-700{% endif %}">EMPENHADOS</a>
+    <span class="text-gray-300">|</span>
+    <a href="?status=ENTREGUE" class="px-3 py-1 text-[10px] font-bold rounded {% if request.GET.status == 'ENTREGUE' %}bg-white text-green-700 shadow-sm border border-gray-300{% else %}text-gray-500 hover:text-gray-700{% endif %}">ENTREGUES</a>
+</div>
+
+<div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200 text-[11px]">
+        <thead class="bg-gray-50 font-bold text-gray-500 uppercase tracking-tighter">
+            <tr>
+                <th class="px-4 py-2 text-left w-16 border-r">CÓDIGO</th>
+                <th class="px-4 py-2 text-left border-r">UNIDADE / SECRETARIA</th>
+                <th class="px-4 py-2 text-left border-r">DATA HORA</th>
+                <th class="px-4 py-2 text-left border-r">STATUS</th>
+                <th class="px-4 py-2 text-right">AÇÕES</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for pedido in pedidos %}
+            <tr class="hover:bg-blue-50 transition cursor-pointer" onclick="window.location='{% url 'pedido_detail' pedido.pk %}'">
+                <td class="px-4 py-2 whitespace-nowrap font-bold text-blue-600 border-r">
+                    #{{ pedido.id|stringformat:"04d" }}
+                </td>
+                <td class="px-4 py-2 whitespace-nowrap font-bold text-gray-700 border-r">
+                    {{ pedido.secretaria|upper }}
+                    {% if pedido.setor %}<span class="text-[9px] text-gray-400 block">{{ pedido.setor|upper }}</span>{% endif %}
+                </td>
+                <td class="px-4 py-2 whitespace-nowrap text-gray-500 border-r">
+                    {{ pedido.data_pedido|date:"d/m/Y H:i" }}
+                </td>
+                <td class="px-4 py-2 whitespace-nowrap border-r">
+                    <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase
+                        {% if pedido.status == 'ENTREGUE' %}bg-green-100 text-green-800 border border-green-200
+                        {% elif pedido.status == 'EMPENHADO' %}bg-purple-100 text-purple-800 border border-purple-200
+                        {% elif pedido.status == 'RESERVADO' %}bg-yellow-100 text-yellow-800 border border-yellow-200
+                        {% elif pedido.status == 'SOLICITADO' %}bg-blue-100 text-blue-800 border border-blue-200
+                        {% else %}bg-gray-100 text-gray-800 border border-gray-200{% endif %}">
+                        {{ pedido.get_status_display }}
+                    </span>
+                </td>
+                <td class="px-4 py-2 whitespace-nowrap text-right font-bold text-blue-600 uppercase italic">
+                    Gerenciar ➔
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="px-4 py-10 text-center text-gray-400 italic">Nenhum registro encontrado para os critérios informados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

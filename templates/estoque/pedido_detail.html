@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Consulta de Pedido #{{ pedido.id }} - Almoxarifado{% endblock %}
+
+{% block breadcrumb %}Pedidos > Gerenciar Pedido #{{ pedido.id }}{% endblock %}
+
+{% block content %}
+<div class="flex flex-col xl:flex-row gap-6">
+    <!-- Main Detail Area -->
+    <div class="flex-1 space-y-4">
+        
+        <!-- Cabeçalho de Status ERP -->
+        <div class="bg-white rounded border border-gray-200 shadow-sm flex overflow-hidden">
+            <div class="w-2 {% if pedido.status == 'ENTREGUE' %}bg-green-600{% elif pedido.status == 'EMPENHADO' %}bg-purple-600{% elif pedido.status == 'RESERVADO' %}bg-yellow-600{% else %}bg-blue-600{% endif %}"></div>
+            <div class="p-4 flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                    <label>Código Interno</label>
+                    <p class="text-sm font-black text-blue-900">#{{ pedido.id|stringformat:"06d" }}</p>
+                </div>
+                <div>
+                    <label>Data Solicitação</label>
+                    <p class="text-xs font-bold text-gray-700">{{ pedido.data_pedido|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div>
+                    <label>Situação Atual</label>
+                    <p class="text-[10px] font-black uppercase text-blue-600">{{ pedido.get_status_display }}</p>
+                </div>
+                <div>
+                    <label>Usuário Responsável</label>
+                    <p class="text-xs font-bold text-gray-700">ADMINISTRADOR</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações da Unidade -->
+        <div class="bg-white rounded border border-gray-200 shadow-sm">
+            <div class="px-4 py-2 bg-gray-50 border-b border-gray-200 font-bold text-gray-600 text-[10px] uppercase">
+                🏛️ Informações da Secretaria / Setor
+            </div>
+            <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label>Unidade/Secretaria</label>
+                    <p class="text-sm font-bold text-gray-800">{{ pedido.secretaria|upper }}</p>
+                </div>
+                <div>
+                    <label>Setor/Departamento</label>
+                    <p class="text-sm font-bold text-gray-800">{{ pedido.setor|upper|default:"NÃO INFORMADO" }}</p>
+                </div>
+                <div class="md:col-span-2">
+                    <label>Endereço de Entrega</label>
+                    <p class="text-xs text-gray-600 font-medium">{{ pedido.endereco_entrega|default:"RETIRADA NO ALMOXARIFADO" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid de Itens -->
+        <div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200 text-[11px]">
+                <thead class="bg-gray-50 font-bold text-gray-500 uppercase">
+                    <tr>
+                        <th class="px-3 py-2 text-left w-12 border-r">Pos</th>
+                        <th class="px-3 py-2 text-left border-r">Descrição do Material</th>
+                        <th class="px-3 py-2 text-center w-16 border-r">Unid</th>
+                        <th class="px-3 py-2 text-right w-24 border-r">Qt. Pedida</th>
+                        <th class="px-3 py-2 text-right w-24 border-r">Qt. Atend.</th>
+                        <th class="px-3 py-2 text-right w-24 border-r">Preço Unit.</th>
+                        <th class="px-3 py-2 text-right w-24">Vl. Total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for item in pedido.itens.all %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-3 py-2 border-r text-center text-gray-400 font-mono">{{ forloop.counter }}</td>
+                        <td class="px-3 py-2 border-r">
+                            <div class="font-bold text-gray-800">{{ item.produto.nome|upper }}</div>
+                            <div class="text-[9px] text-gray-400">CAT: {{ item.produto.categoria.nome }}</div>
+                        </td>
+                        <td class="px-3 py-2 border-r text-center font-bold text-gray-500">{{ item.produto.unidade_medida }}</td>
+                        <td class="px-3 py-2 border-r text-right font-bold text-gray-700">{{ item.quantidade }}</td>
+                        <td class="px-3 py-2 border-r text-right font-bold text-blue-600">{{ item.quantidade_atendida }}</td>
+                        <td class="px-3 py-2 border-r text-right text-gray-500">R$ {{ item.preco_unitario }}</td>
+                        <td class="px-3 py-2 text-right font-black text-gray-900">R$ {{ item.total_pedido }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="bg-gray-50 border-t-2 border-gray-200 font-black">
+                    <tr>
+                        <td colspan="6" class="px-4 py-2 text-right text-gray-500 uppercase">Valor Total do Pedido:</td>
+                        <td class="px-4 py-2 text-right text-blue-900 text-sm">R$ {{ total_geral|default:"0,00" }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Fluxo de Conformidade (Seções Condicionais) -->
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if pedido.status == 'SOLICITADO' %}
+            <div class="p-4 bg-blue-50 border border-blue-200 rounded flex items-center justify-between shadow-sm">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">⏳</span>
+                    <div>
+                        <p class="text-xs font-bold text-blue-900 uppercase">Aguardando Reserva</p>
+                        <p class="text-[10px] text-blue-700">O sistema já validou o saldo disponível. Clique em reservar para garantir o material.</p>
+                    </div>
+                </div>
+                <button type="submit" name="reservar" class="bg-blue-600 text-white px-4 py-2 rounded text-[10px] font-bold uppercase shadow hover:bg-blue-700 transition">
+                    Efetuar Reserva agora
+                </button>
+            </div>
+            {% endif %}
+
+            {% if pedido.status == 'RESERVADO' %}
+            <div class="p-4 bg-purple-50 border border-purple-200 rounded shadow-sm">
+                <div class="flex items-center space-x-3 mb-4">
+                    <span class="text-2xl">📎</span>
+                    <div>
+                        <p class="text-xs font-bold text-purple-900 uppercase">Vincular Empenho</p>
+                        <p class="text-[10px] text-purple-700">O material está reservado. Informe o número e anexe o arquivo PDF para prosseguir.</p>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row md:items-end gap-4">
+                    <div class="flex-1">
+                        <label>Anexo do Empenho (PDF/IMG)</label>
+                        {{ empenho_form.empenho_anexo }}
+                    </div>
+                    <button type="submit" name="anexar_empenho" class="bg-purple-600 text-white px-6 py-2 rounded text-[10px] font-bold uppercase shadow hover:bg-purple-700 transition">
+                        Confirmar Empenho
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if pedido.status == 'EMPENHADO' %}
+            <div class="p-4 bg-green-50 border border-green-200 rounded flex items-center justify-between shadow-sm">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">🚚</span>
+                    <div>
+                        <p class="text-xs font-bold text-green-900 uppercase">Pronto para Entrega Física</p>
+                        <p class="text-[10px] text-green-700">O empenho foi validado. Confirme a entrega do material para realizar a baixa física.</p>
+                    </div>
+                </div>
+                <button type="submit" name="confirmar_entrega" class="bg-green-600 text-white px-6 py-2 rounded text-[10px] font-bold uppercase shadow hover:bg-green-700 transition">
+                    Confirmar Entrega
+                </button>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Action Sidebar (Right Side) -->
+    <div class="w-full xl:w-40 space-y-3">
+        <button type="button" class="btn-erp text-blue-400 opacity-50 cursor-not-allowed">
+            <span>💾</span>
+            <span>Salvar</span>
+            <span>-</span>
+        </button>
+        <a href="{% url 'pedido_create' %}" class="btn-erp text-green-600 border-green-200 bg-green-50">
+            <span>📄</span>
+            <span>Incluir</span>
+            <span>[F2]</span>
+        </a>
+        <button type="button" class="btn-erp">
+            <span>✏️</span>
+            <span>Alterar</span>
+            <span>[F3]</span>
+        </button>
+        <button type="button" class="btn-erp text-red-600 border-red-200 bg-red-50">
+            <span>🗑️</span>
+            <span>Excluir</span>
+            <span>[F4]</span>
+        </button>
+        <button type="button" onclick="window.print()" class="btn-erp">
+            <span>🖨️</span>
+            <span>Imprimir</span>
+            <span>-</span>
+        </button>
+        <a href="{% url 'pedido_list' %}" class="btn-erp">
+            <span>🚪</span>
+            <span>Fechar</span>
+            <span>[Esc]</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

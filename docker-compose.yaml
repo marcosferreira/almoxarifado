@@ -14,8 +14,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    networks:
-      - almoxarifado_network
+    # networks:
+    #   - almoxarifado_network
 
   db:
     image: postgres:17-alpine
@@ -31,8 +31,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - almoxarifado_network
+    # networks:
+    #   - almoxarifado_network
 
 volumes:
   postgres_data:

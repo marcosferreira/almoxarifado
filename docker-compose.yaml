@@ -38,6 +38,6 @@ volumes:
   postgres_data:
   media_volume:
 
-networks:
-  almoxarifado_network:
-    driver: bridge
+# networks:
+#   almoxarifado_network:
+#     driver: bridge

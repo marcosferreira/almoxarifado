@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: almoxarifado_app_dev
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-almoxarifado}
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-key}
+      - DEBUG=True
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - almoxarifado_network_dev
+
+  db:
+    image: postgres:17-alpine
+    container_name: almoxarifado_db_dev
+    environment:
+      - POSTGRES_DB=${DB_NAME:-almoxarifado}
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-almoxarifado}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - almoxarifado_network_dev
+
+volumes:
+  postgres_data_dev:
+
+networks:
+  almoxarifado_network_dev:
+    driver: bridge

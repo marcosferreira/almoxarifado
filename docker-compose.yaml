@@ -3,13 +3,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: almoxarifado_app
     restart: always
     environment:
-      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-almoxarifado}
       - SECRET_KEY=${SECRET_KEY}
-      - DEBUG=False
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - DEBUG=${DEBUG:-False}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
     volumes:
       - media_volume:/app/media
     depends_on:
@@ -20,17 +19,16 @@ services:
 
   db:
     image: postgres:17-alpine
-    container_name: almoxarifado_db
     restart: always
     environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME:-almoxarifado}
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-almoxarifado}"]
+      interval: 5s
       timeout: 5s
       retries: 5
     networks:

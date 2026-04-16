@@ -13,7 +13,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-6 gap-2 text-[12px]">
                     <div>
                         <label>Código</label>
-                        <input type="text" value="{{ pedido.id }}" disabled class="bg-white/90 font-bold text-xl text-[#132c4d]">
+                        <input type="text" value="{{ pedido.id }}" disabled class="bg-white/90 font-bold text-xl themed-strong">
                     </div>
                     <div>
                         <label>Data</label>
@@ -66,48 +66,48 @@
                 </div>
             </div>
 
-            <div class="window-panel overflow-x-auto bg-white">
+            <div class="window-panel overflow-x-auto themed-table-wrap">
                 <table class="min-w-full text-[11px]">
-                    <thead class="bg-[#dbe6f8] text-[#27486f]">
+                    <thead class="themed-table-head">
                         <tr>
-                            <th class="px-2 py-1 border border-[#9bb1ce]">Cód</th>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-left">Descrição</th>
-                            <th class="px-2 py-1 border border-[#9bb1ce]">Unidade</th>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-right">Qt Pedida</th>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-right">Qt Atendida</th>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-right">Preço</th>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-right">Qt Licitada</th>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-right">Restante</th>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-right">Total Pedido</th>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-right">Total Atend.</th>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-right">% Licit.</th>
+                            <th class="px-2 py-1 themed-th">Cód</th>
+                            <th class="px-2 py-1 themed-th text-left">Descrição</th>
+                            <th class="px-2 py-1 themed-th">Unidade</th>
+                            <th class="px-2 py-1 themed-th text-right">Qt Pedida</th>
+                            <th class="px-2 py-1 themed-th text-right">Qt Atendida</th>
+                            <th class="px-2 py-1 themed-th text-right">Preço</th>
+                            <th class="px-2 py-1 themed-th text-right">Qt Licitada</th>
+                            <th class="px-2 py-1 themed-th text-right">Restante</th>
+                            <th class="px-2 py-1 themed-th text-right">Total Pedido</th>
+                            <th class="px-2 py-1 themed-th text-right">Total Atend.</th>
+                            <th class="px-2 py-1 themed-th text-right">% Licit.</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in itens %}
-                        <tr>
-                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ forloop.counter }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] font-semibold">{{ item.produto.nome|upper }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-center">{{ item.produto.unidade_medida }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">{{ item.quantidade }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">{{ item.quantidade_atendida }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">R$ {{ item.preco_unitario }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">{{ item.quantidade_licitada }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right bg-[#0d43b8] text-white font-bold">{{ item.restante_licitacao }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">R$ {{ item.total_pedido }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">R$ {{ item.total_atendido }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">{{ item.percentual_licitado|floatformat:2 }}</td>
+                        <tr class="themed-row">
+                            <td class="px-2 py-1 themed-td">{{ forloop.counter }}</td>
+                            <td class="px-2 py-1 themed-td font-semibold themed-strong">{{ item.produto.nome|upper }}</td>
+                            <td class="px-2 py-1 themed-td text-center">{{ item.produto.unidade_medida }}</td>
+                            <td class="px-2 py-1 themed-td text-right">{{ item.quantidade }}</td>
+                            <td class="px-2 py-1 themed-td text-right">{{ item.quantidade_atendida }}</td>
+                            <td class="px-2 py-1 themed-td text-right">R$ {{ item.preco_unitario }}</td>
+                            <td class="px-2 py-1 themed-td text-right">{{ item.quantidade_licitada }}</td>
+                            <td class="px-2 py-1 themed-td text-right themed-attention font-bold">{{ item.restante_licitacao }}</td>
+                            <td class="px-2 py-1 themed-td text-right">R$ {{ item.total_pedido }}</td>
+                            <td class="px-2 py-1 themed-td text-right">R$ {{ item.total_atendido }}</td>
+                            <td class="px-2 py-1 themed-td text-right">{{ item.percentual_licitado|floatformat:2 }}</td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="11" class="px-2 py-8 border border-[#c2d1e7] text-center">Nenhum item no pedido.</td></tr>
+                        <tr><td colspan="11" class="px-2 py-8 themed-td text-center">Nenhum item no pedido.</td></tr>
                         {% endfor %}
                     </tbody>
-                    <tfoot class="bg-[#dbe6f8] text-[#17355d] font-bold">
+                    <tfoot class="themed-table-head themed-strong font-bold">
                         <tr>
-                            <td colspan="8" class="px-2 py-1 border border-[#9bb1ce] text-right">Totais</td>
-                            <td class="px-2 py-1 border border-[#9bb1ce] text-right">R$ {{ total_geral|floatformat:2 }}</td>
-                            <td class="px-2 py-1 border border-[#9bb1ce] text-right">R$ {{ total_atendido|floatformat:2 }}</td>
-                            <td class="px-2 py-1 border border-[#9bb1ce]"></td>
+                            <td colspan="8" class="px-2 py-1 themed-th text-right">Totais</td>
+                            <td class="px-2 py-1 themed-th text-right">R$ {{ total_geral|floatformat:2 }}</td>
+                            <td class="px-2 py-1 themed-th text-right">R$ {{ total_atendido|floatformat:2 }}</td>
+                            <td class="px-2 py-1 themed-th"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -117,7 +117,7 @@
                 {% csrf_token %}
                 {% if pedido.status == 'SOLICITADO' %}
                 <div class="flex items-center justify-between gap-3">
-                    <p class="font-semibold text-[#1d3a5f]">Pedido aguardando reserva de saldo.</p>
+                    <p class="font-semibold themed-strong">Pedido aguardando reserva de saldo.</p>
                     <button type="submit" name="reservar" class="action-btn w-auto">Efetuar Reserva</button>
                 </div>
                 {% endif %}
@@ -134,7 +134,7 @@
 
                 {% if pedido.status == 'EMPENHADO' %}
                 <div class="flex items-center justify-between gap-3">
-                    <p class="font-semibold text-[#1d3a5f]">Empenho anexado. Pedido pronto para baixa física.</p>
+                    <p class="font-semibold themed-strong">Empenho anexado. Pedido pronto para baixa física.</p>
                     <button type="submit" name="confirmar_entrega" class="action-btn w-auto">Confirmar Entrega</button>
                 </div>
                 {% endif %}

@@ -21,31 +21,31 @@
                 <button type="button" class="action-btn w-auto">Filtrar <span>Enter</span></button>
             </form>
 
-            <div class="window-panel overflow-x-auto bg-white">
+            <div class="window-panel overflow-x-auto themed-table-wrap">
                 <table class="min-w-full text-[11px]">
-                    <thead class="bg-[#dbe6f8] text-[#27486f] uppercase">
+                    <thead class="themed-table-head uppercase">
                         <tr>
-                            <th class="px-2 py-1 text-left border border-[#9bb1ce] w-12">Cód</th>
-                            <th class="px-2 py-1 text-left border border-[#9bb1ce]">Fornecedor</th>
-                            <th class="px-2 py-1 text-left border border-[#9bb1ce]">Razão Social</th>
-                            <th class="px-2 py-1 text-left border border-[#9bb1ce] w-40">CNPJ</th>
-                            <th class="px-2 py-1 text-left border border-[#9bb1ce] w-36">Contato</th>
-                            <th class="px-2 py-1 text-left border border-[#9bb1ce] w-28">Telefone</th>
+                            <th class="px-2 py-1 text-left themed-th w-12">Cód</th>
+                            <th class="px-2 py-1 text-left themed-th">Fornecedor</th>
+                            <th class="px-2 py-1 text-left themed-th">Razão Social</th>
+                            <th class="px-2 py-1 text-left themed-th w-40">CNPJ</th>
+                            <th class="px-2 py-1 text-left themed-th w-36">Contato</th>
+                            <th class="px-2 py-1 text-left themed-th w-28">Telefone</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for fornecedor in fornecedores %}
-                        <tr class="hover:bg-[#eef4ff]">
-                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ forloop.counter }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] font-semibold text-[#1d426f]">{{ fornecedor.nome_fantasia|upper }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-[#5a7da4]">{{ fornecedor.razao_social|default:"-" }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ fornecedor.cnpj }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ fornecedor.contato|default:"-" }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ fornecedor.telefone|default:"-" }}</td>
+                        <tr class="themed-row">
+                            <td class="px-2 py-1 themed-td">{{ forloop.counter }}</td>
+                            <td class="px-2 py-1 themed-td font-semibold themed-strong">{{ fornecedor.nome_fantasia|upper }}</td>
+                            <td class="px-2 py-1 themed-td themed-muted">{{ fornecedor.razao_social|default:"-" }}</td>
+                            <td class="px-2 py-1 themed-td">{{ fornecedor.cnpj }}</td>
+                            <td class="px-2 py-1 themed-td">{{ fornecedor.contato|default:"-" }}</td>
+                            <td class="px-2 py-1 themed-td">{{ fornecedor.telefone|default:"-" }}</td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="px-3 py-8 text-center border border-[#c2d1e7] text-[#5f7fa6]">Nenhum fornecedor cadastrado.</td>
+                            <td colspan="6" class="px-3 py-8 text-center themed-td themed-muted">Nenhum fornecedor cadastrado.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -81,7 +81,7 @@
                         <button type="button" class="action-btn w-auto">Filtrar <span>F5</span></button>
                     </div>
                 </div>
-                <div class="window-panel bg-white p-3 text-[#58789f]">A listagem principal já está no padrão de consulta completa.</div>
+                <div class="window-panel themed-table-wrap p-3 themed-muted">A listagem principal já está no padrão de consulta completa.</div>
             </div>
         </div>
     </div>

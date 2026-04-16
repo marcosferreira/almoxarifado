@@ -23,37 +23,37 @@
                 <button type="submit" class="action-btn w-auto">Filtrar <span>Enter</span></button>
             </form>
 
-            <div class="window-panel overflow-x-auto bg-white">
+            <div class="window-panel overflow-x-auto themed-table-wrap">
                 <table class="min-w-full text-[11px]">
-                    <thead class="bg-[#dbe6f8] text-[#27486f] uppercase">
+                    <thead class="themed-table-head uppercase">
                         <tr>
-                            <th class="px-2 py-1 text-left border border-[#9bb1ce] w-12">Cód</th>
-                            <th class="px-2 py-1 text-left border border-[#9bb1ce]">Descrição do Material</th>
-                            <th class="px-2 py-1 text-left border border-[#9bb1ce] w-32">Categoria</th>
-                            <th class="px-2 py-1 text-center border border-[#9bb1ce] w-16">Unid</th>
-                            <th class="px-2 py-1 text-right border border-[#9bb1ce] w-24">Físico</th>
-                            <th class="px-2 py-1 text-right border border-[#9bb1ce] w-24">Reserva</th>
-                            <th class="px-2 py-1 text-right border border-[#9bb1ce] w-24">Saldo Disp.</th>
-                            <th class="px-2 py-1 text-right border border-[#9bb1ce] w-20">Ações</th>
+                            <th class="px-2 py-1 text-left themed-th w-12">Cód</th>
+                            <th class="px-2 py-1 text-left themed-th">Descrição do Material</th>
+                            <th class="px-2 py-1 text-left themed-th w-32">Categoria</th>
+                            <th class="px-2 py-1 text-center themed-th w-16">Unid</th>
+                            <th class="px-2 py-1 text-right themed-th w-24">Físico</th>
+                            <th class="px-2 py-1 text-right themed-th w-24">Reserva</th>
+                            <th class="px-2 py-1 text-right themed-th w-24">Saldo Disp.</th>
+                            <th class="px-2 py-1 text-right themed-th w-20">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for produto in produtos %}
-                        <tr class="hover:bg-[#eef4ff] transition">
-                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ forloop.counter }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] font-semibold text-[#1d426f]">{{ produto.nome|upper }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-[#56779f]">{{ produto.categoria.nome|upper }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-center">{{ produto.unidade_medida }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right {% if produto.estoque_atual < produto.estoque_minimo %}text-red-700 font-bold{% endif %}">{{ produto.estoque_atual }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right text-amber-700">{{ produto.estoque_reservado }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right text-[#0d3892] font-bold">{{ produto.estoque_disponivel }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">
-                                <a href="{% url 'produto_update' produto.pk %}" class="text-[#1d4a7d] font-bold hover:underline">Editar</a>
+                        <tr class="themed-row">
+                            <td class="px-2 py-1 themed-td">{{ forloop.counter }}</td>
+                            <td class="px-2 py-1 themed-td font-semibold themed-strong">{{ produto.nome|upper }}</td>
+                            <td class="px-2 py-1 themed-td themed-muted">{{ produto.categoria.nome|upper }}</td>
+                            <td class="px-2 py-1 themed-td text-center">{{ produto.unidade_medida }}</td>
+                            <td class="px-2 py-1 themed-td text-right {% if produto.estoque_atual < produto.estoque_minimo %}text-red-700 font-bold{% endif %}">{{ produto.estoque_atual }}</td>
+                            <td class="px-2 py-1 themed-td text-right text-amber-700">{{ produto.estoque_reservado }}</td>
+                            <td class="px-2 py-1 themed-td text-right font-bold" style="color: var(--color-ring);">{{ produto.estoque_disponivel }}</td>
+                            <td class="px-2 py-1 themed-td text-right">
+                                <a href="{% url 'produto_update' produto.pk %}" class="font-bold hover:underline" style="color: var(--color-strong);">Editar</a>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="8" class="px-3 py-8 text-center border border-[#c2d1e7] text-[#5f7fa6]">Nenhum produto encontrado.</td>
+                            <td colspan="8" class="px-3 py-8 text-center themed-td themed-muted">Nenhum produto encontrado.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -93,7 +93,7 @@
                         <button type="button" class="action-btn w-auto">Filtrar <span>F5</span></button>
                     </div>
                 </div>
-                <div class="window-panel bg-white p-3 text-[#58789f]">A listagem principal já está no padrão de consulta completa.</div>
+                <div class="window-panel themed-table-wrap p-3 themed-muted">A listagem principal já está no padrão de consulta completa.</div>
             </div>
         </div>
     </div>

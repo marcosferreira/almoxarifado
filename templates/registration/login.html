@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Almoxarifado Dona Inês</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}">
     <style type="text/tailwindcss">
         @layer base {
             input[type="text"],
@@ -18,34 +22,58 @@
         }
         @layer components {
             .window-panel {
-                @apply border border-[#7f9db9] bg-[#b9c7df] shadow-[inset_0_0_0_1px_#dce6f7];
+                border: 1px solid var(--color-border);
+                background: var(--color-panel);
+                box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-border) 30%, white), var(--shadow-sm);
+                border-radius: var(--radius-md);
             }
             .window-title {
-                @apply px-3 py-1 text-[12px] font-bold text-[#21416b] bg-gradient-to-r from-[#dfe8f5] to-[#bacce8] border-b border-[#8ca5c9];
+                @apply px-3 py-1 text-[12px] font-bold;
+                color: var(--color-secondary);
+                background: linear-gradient(to right, var(--color-title-from), var(--color-title-to));
+                border-bottom: 1px solid var(--color-title-border);
             }
             .section-box {
-                @apply bg-[#aebdd7] border border-[#8aa1c2] p-3;
+                @apply p-3;
+                background: var(--color-panel-2);
+                border: 1px solid var(--color-border-soft);
+                border-radius: var(--radius-sm);
             }
             .action-btn {
-                @apply w-full flex items-center justify-center gap-2 px-3 py-1.5 text-[11px] border border-[#7f90ab] bg-gradient-to-b from-[#f6f8fc] to-[#c8d3e8] text-[#243c5a] font-semibold hover:from-[#ffffff] hover:to-[#d7e1f3] active:translate-y-px;
+                @apply w-full flex items-center justify-center gap-2 px-3 py-1.5 text-[11px] font-semibold active:translate-y-px;
+                border: 1px solid var(--color-action-border);
+                background: linear-gradient(to bottom, var(--color-action-from), var(--color-action-to));
+                color: var(--color-action-text);
+                border-radius: var(--radius-sm);
+                box-shadow: var(--shadow-sm);
+            }
+            .action-btn:hover {
+                background: linear-gradient(to bottom, var(--color-action-hover-from), var(--color-action-hover-to));
             }
         }
     </style>
     <style>
+        .themed-strong {
+            color: var(--color-strong);
+        }
+        .themed-muted {
+            color: var(--color-muted);
+        }
         body {
-            font-family: "Segoe UI", Tahoma, sans-serif;
+            font-family: var(--font-sans);
+            background: radial-gradient(circle at top right, color-mix(in srgb, var(--color-title-from) 70%, white), var(--color-bg));
         }
     </style>
 </head>
-<body class="bg-[#b6c3dd] min-h-screen">
+<body data-theme="modern" class="min-h-screen">
     <div class="min-h-screen flex items-center justify-center p-4">
         <div class="window-panel w-full max-w-md">
             <div class="window-title">Acesso ao Sistema</div>
             <div class="p-3 space-y-3">
                 <div class="section-box text-center">
                     <img src="{% static 'images/logo.png' %}" alt="Brasao de Dona Ines" class="h-24 w-auto mx-auto object-contain" loading="eager">
-                    <h1 class="mt-2 text-[16px] font-bold text-[#17355d] uppercase tracking-tight">Almoxarifado</h1>
-                    <p class="text-[11px] text-[#365681]">Prefeitura Municipal de Dona Ines</p>
+                    <h1 class="mt-2 text-[16px] font-bold uppercase tracking-tight themed-strong">Almoxarifado</h1>
+                    <p class="text-[11px] themed-muted">Prefeitura Municipal de Dona Ines</p>
                 </div>
 
                 <form method="post" class="section-box space-y-3">
@@ -68,7 +96,7 @@
                     <button type="submit" class="action-btn">Entrar no Sistema</button>
                 </form>
 
-                <div class="text-center text-[10px] text-[#4c6f97]">
+                <div class="text-center text-[10px] themed-muted">
                     201075 - Prefeitura Municipal de Dona Ines
                 </div>
             </div>

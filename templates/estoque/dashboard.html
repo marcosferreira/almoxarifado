@@ -10,43 +10,43 @@
         <div class="window-panel">
             <div class="window-title">Resumo Operacional</div>
             <div class="p-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-[12px]">
-                <div class="section-box bg-[#dce6f7]">
-                    <p class="text-[#365681]">Produtos em Catálogo</p>
-                    <p class="text-2xl font-bold text-[#16345b]">{{ total_produtos }}</p>
+                <div class="section-box kpi-info">
+                    <p class="themed-muted">Produtos em Catálogo</p>
+                    <p class="text-2xl font-bold">{{ total_produtos }}</p>
                 </div>
-                <div class="section-box bg-[#e9f0ff]">
-                    <p class="text-[#365681]">Pedidos Reservados</p>
-                    <p class="text-2xl font-bold text-[#16345b]">{{ pedidos_reservados }}</p>
+                <div class="section-box kpi-primary">
+                    <p class="themed-muted">Pedidos Reservados</p>
+                    <p class="text-2xl font-bold">{{ pedidos_reservados }}</p>
                 </div>
-                <div class="section-box bg-[#d8efe3]">
-                    <p class="text-[#365681]">Entregas Realizadas</p>
-                    <p class="text-2xl font-bold text-[#16345b]">{{ entregas_realizadas }}</p>
+                <div class="section-box kpi-success">
+                    <p class="themed-muted">Entregas Realizadas</p>
+                    <p class="text-2xl font-bold">{{ entregas_realizadas }}</p>
                 </div>
             </div>
         </div>
 
         <div class="window-panel">
             <div class="window-title">Últimos Pedidos</div>
-            <div class="overflow-x-auto bg-white">
+            <div class="overflow-x-auto themed-table-wrap">
                 <table class="min-w-full text-[12px] border-collapse">
-                    <thead class="bg-[#dbe6f8] text-[#27486f]">
+                    <thead class="themed-table-head">
                         <tr>
-                            <th class="p-2 text-left border border-[#9bb1ce]">Código</th>
-                            <th class="p-2 text-left border border-[#9bb1ce]">Secretaria</th>
-                            <th class="p-2 text-left border border-[#9bb1ce]">Data</th>
-                            <th class="p-2 text-left border border-[#9bb1ce]">Status</th>
+                            <th class="p-2 text-left themed-th">Código</th>
+                            <th class="p-2 text-left themed-th">Secretaria</th>
+                            <th class="p-2 text-left themed-th">Data</th>
+                            <th class="p-2 text-left themed-th">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for pedido in pedidos_recentes %}
-                        <tr class="hover:bg-[#f0f5ff] cursor-pointer" onclick="window.location='{% url 'pedido_detail' pedido.pk %}'">
-                            <td class="p-2 border border-[#c2d1e7] font-bold text-[#17355d]">#{{ pedido.id|stringformat:"04d" }}</td>
-                            <td class="p-2 border border-[#c2d1e7]">{{ pedido.secretaria|upper }}</td>
-                            <td class="p-2 border border-[#c2d1e7]">{{ pedido.data_pedido|date:"d/m/Y H:i" }}</td>
-                            <td class="p-2 border border-[#c2d1e7]">{{ pedido.get_status_display }}</td>
+                        <tr class="themed-row cursor-pointer" onclick="window.location='{% url 'pedido_detail' pedido.pk %}'">
+                            <td class="p-2 themed-td font-bold themed-strong">#{{ pedido.id|stringformat:"04d" }}</td>
+                            <td class="p-2 themed-td">{{ pedido.secretaria|upper }}</td>
+                            <td class="p-2 themed-td">{{ pedido.data_pedido|date:"d/m/Y H:i" }}</td>
+                            <td class="p-2 themed-td">{{ pedido.get_status_display }}</td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="4" class="p-4 text-center border border-[#c2d1e7]">Sem pedidos recentes.</td></tr>
+                        <tr><td colspan="4" class="p-4 text-center themed-td">Sem pedidos recentes.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -55,26 +55,26 @@
 
         <div class="window-panel">
             <div class="window-title">Entradas Recentes</div>
-            <div class="overflow-x-auto bg-white">
+            <div class="overflow-x-auto themed-table-wrap">
                 <table class="min-w-full text-[12px] border-collapse">
-                    <thead class="bg-[#dbe6f8] text-[#27486f]">
+                    <thead class="themed-table-head">
                         <tr>
-                            <th class="p-2 text-left border border-[#9bb1ce]">Data</th>
-                            <th class="p-2 text-left border border-[#9bb1ce]">Fornecedor</th>
-                            <th class="p-2 text-left border border-[#9bb1ce]">Nº Nota</th>
-                            <th class="p-2 text-left border border-[#9bb1ce]">Itens</th>
+                            <th class="p-2 text-left themed-th">Data</th>
+                            <th class="p-2 text-left themed-th">Fornecedor</th>
+                            <th class="p-2 text-left themed-th">Nº Nota</th>
+                            <th class="p-2 text-left themed-th">Itens</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for entrada in entradas_recentes %}
                         <tr>
-                            <td class="p-2 border border-[#c2d1e7]">{{ entrada.data_entrada|date:"d/m/Y" }}</td>
-                            <td class="p-2 border border-[#c2d1e7]">{{ entrada.fornecedor.nome_fantasia }}</td>
-                            <td class="p-2 border border-[#c2d1e7]">{{ entrada.numero_nota|default:"S/N" }}</td>
-                            <td class="p-2 border border-[#c2d1e7]">{{ entrada.itens.count }}</td>
+                            <td class="p-2 themed-td">{{ entrada.data_entrada|date:"d/m/Y" }}</td>
+                            <td class="p-2 themed-td">{{ entrada.fornecedor.nome_fantasia }}</td>
+                            <td class="p-2 themed-td">{{ entrada.numero_nota|default:"S/N" }}</td>
+                            <td class="p-2 themed-td">{{ entrada.itens.count }}</td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="4" class="p-4 text-center border border-[#c2d1e7]">Sem entradas recentes.</td></tr>
+                        <tr><td colspan="4" class="p-4 text-center themed-td">Sem entradas recentes.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -95,11 +95,11 @@
 
         <div class="window-panel">
             <div class="window-title">Pendentes de Empenho</div>
-            <div class="bg-white">
+            <div class="themed-table-wrap">
                 {% for pedido in pedidos_pendentes_empenho %}
-                <a href="{% url 'pedido_detail' pedido.pk %}" class="block p-2 text-[12px] border-b border-[#d4deef] hover:bg-[#eef4ff]">
-                    <p class="font-semibold text-[#1a365d]">#{{ pedido.id }} - {{ pedido.secretaria|upper }}</p>
-                    <p class="text-[#43658d]">{{ pedido.data_pedido|date:"d/m/Y H:i" }}</p>
+                <a href="{% url 'pedido_detail' pedido.pk %}" class="block p-2 text-[12px] border-b themed-row" style="border-color: var(--color-table-cell-border);">
+                    <p class="font-semibold themed-strong">#{{ pedido.id }} - {{ pedido.secretaria|upper }}</p>
+                    <p class="themed-muted">{{ pedido.data_pedido|date:"d/m/Y H:i" }}</p>
                 </a>
                 {% empty %}
                 <p class="p-3 text-[12px]">Nenhum pedido aguardando empenho.</p>
@@ -109,10 +109,10 @@
 
         <div class="window-panel">
             <div class="window-title">Estoque Crítico</div>
-            <div class="bg-white">
+            <div class="themed-table-wrap">
                 {% for produto in estoque_critico|slice:":8" %}
-                <div class="p-2 text-[12px] border-b border-[#d4deef]">
-                    <p class="font-semibold text-[#1a365d]">{{ produto.nome|upper }}</p>
+                <div class="p-2 text-[12px] border-b" style="border-color: var(--color-table-cell-border);">
+                    <p class="font-semibold themed-strong">{{ produto.nome|upper }}</p>
                     <p class="text-red-700">{{ produto.estoque_atual }} {{ produto.unidade_medida }} / Min {{ produto.estoque_minimo }}</p>
                 </div>
                 {% empty %}

@@ -68,51 +68,51 @@
                 </div>
             </div>
 
-            <div class="window-panel overflow-x-auto bg-white">
+            <div class="window-panel overflow-x-auto themed-table-wrap">
                 {{ formset.management_form }}
                 <table class="min-w-full text-[11px]" id="item-table">
-                    <thead class="bg-[#dbe6f8] text-[#27486f]">
+                    <thead class="themed-table-head">
                     <tr>
-                        <th class="px-2 py-1 border border-[#9bb1ce] text-left">Cód</th>
-                        <th class="px-2 py-1 border border-[#9bb1ce] text-left">Descrição</th>
-                        <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Quant.</th>
-                        <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Vlr Unit</th>
-                        <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Licit. Rest.</th>
-                        <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Total</th>
-                        <th class="px-2 py-1 border border-[#9bb1ce] text-center w-14">X</th>
+                        <th class="px-2 py-1 themed-th text-left">Cód</th>
+                        <th class="px-2 py-1 themed-th text-left">Descrição</th>
+                        <th class="px-2 py-1 themed-th text-right w-24">Quant.</th>
+                        <th class="px-2 py-1 themed-th text-right w-24">Vlr Unit</th>
+                        <th class="px-2 py-1 themed-th text-right w-24">Licit. Rest.</th>
+                        <th class="px-2 py-1 themed-th text-right w-24">Total</th>
+                        <th class="px-2 py-1 themed-th text-center w-14">X</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for form in formset %}
-                    <tr class="item-form hover:bg-[#eef4ff]">
-                        <td class="px-2 py-1 border border-[#c2d1e7]">{{ forloop.counter }}</td>
-                        <td class="px-2 py-1 border border-[#c2d1e7]">
+                    <tr class="item-form themed-row">
+                        <td class="px-2 py-1 themed-td">{{ forloop.counter }}</td>
+                        <td class="px-2 py-1 themed-td">
                             {{ form.id }}
                             {{ form.produto }}
                             {% if form.produto.errors %}
                             <p class="text-[10px] text-red-600 font-medium">{{ form.produto.errors.0 }}</p>
                             {% endif %}
                         </td>
-                        <td class="px-2 py-1 border border-[#c2d1e7]">
+                        <td class="px-2 py-1 themed-td">
                             {{ form.quantidade }}
                         </td>
-                        <td class="px-2 py-1 border border-[#c2d1e7]">
+                        <td class="px-2 py-1 themed-td">
                             {{ form.preco_unitario }}
                         </td>
-                        <td class="px-2 py-1 border border-[#c2d1e7]">
+                        <td class="px-2 py-1 themed-td">
                             {{ form.licitacao_restante }}
                         </td>
-                        <td class="px-2 py-1 border border-[#c2d1e7] text-right font-semibold">
+                        <td class="px-2 py-1 themed-td text-right font-semibold">
                             R$ <span x-text="calcRowTotal($el)">0,00</span>
                         </td>
-                        <td class="px-2 py-1 border border-[#c2d1e7] text-center">
+                        <td class="px-2 py-1 themed-td text-center">
                             {{ form.DELETE }}
                         </td>
                     </tr>
                     {% endfor %}
                     </tbody>
                 </table>
-                <div class="p-2 text-right text-[12px] font-bold text-[#17355d] bg-[#dbe6f8] border-t border-[#9bb1ce]">
+                <div class="p-2 text-right text-[12px] font-bold themed-strong themed-table-head border-t" style="border-color: var(--color-table-head-border);">
                     Total geral: R$ <span x-text="calcGrandTotal()">0,00</span>
                 </div>
             </div>
@@ -155,19 +155,19 @@
                         <button type="button" class="action-btn w-auto">Adicionar <span>Enter</span></button>
                     </div>
                 </div>
-                <div class="window-panel bg-white overflow-x-auto">
+                <div class="window-panel themed-table-wrap overflow-x-auto">
                     <table class="min-w-full text-[11px]">
-                        <thead class="bg-[#dbe6f8] text-[#27486f]">
+                        <thead class="themed-table-head">
                             <tr>
-                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Item</th>
-                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Produto</th>
-                                <th class="px-2 py-1 border border-[#9bb1ce] text-right">Quantidade</th>
-                                <th class="px-2 py-1 border border-[#9bb1ce] text-right">Valor</th>
+                                <th class="px-2 py-1 themed-th text-left">Item</th>
+                                <th class="px-2 py-1 themed-th text-left">Produto</th>
+                                <th class="px-2 py-1 themed-th text-right">Quantidade</th>
+                                <th class="px-2 py-1 themed-th text-right">Valor</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="4" class="px-2 py-6 border border-[#c2d1e7] text-center text-[#54769d]">Preencha os campos para adicionar novos itens à entrada.</td>
+                                <td colspan="4" class="px-2 py-6 themed-td text-center themed-muted">Preencha os campos para adicionar novos itens à entrada.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -200,19 +200,19 @@
                         <button type="button" class="action-btn w-auto">Filtrar <span>F5</span></button>
                     </div>
                 </div>
-                <div class="window-panel bg-white overflow-x-auto">
+                <div class="window-panel themed-table-wrap overflow-x-auto">
                     <table class="min-w-full text-[11px]">
-                        <thead class="bg-[#dbe6f8] text-[#27486f]">
+                        <thead class="themed-table-head">
                             <tr>
-                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Data</th>
-                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Fornecedor</th>
-                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Nota</th>
-                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Itens</th>
+                                <th class="px-2 py-1 themed-th text-left">Data</th>
+                                <th class="px-2 py-1 themed-th text-left">Fornecedor</th>
+                                <th class="px-2 py-1 themed-th text-left">Nota</th>
+                                <th class="px-2 py-1 themed-th text-left">Itens</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="4" class="px-2 py-6 border border-[#c2d1e7] text-center text-[#54769d]">A consulta completa permanece disponível na tela de entradas.</td>
+                                <td colspan="4" class="px-2 py-6 themed-td text-center themed-muted">A consulta completa permanece disponível na tela de entradas.</td>
                             </tr>
                         </tbody>
                     </table>

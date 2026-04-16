@@ -1,34 +1,111 @@
-:root {
+:root,
+[data-theme="classic"] {
   --color-bg: #b6c3dd;
   --color-panel: #b9c7df;
   --color-panel-2: #aebdd7;
+  --color-surface: #e7edf7;
   --color-primary: #16345b;
-  --color-accent: #0d3892;
+  --color-secondary: #27486f;
   --color-border: #7f9db9;
+  --color-border-soft: #8ea6c8;
+  --color-title-from: #dfe8f5;
+  --color-title-to: #bacce8;
+  --color-title-border: #8ca5c9;
+  --color-action-text: #243c5a;
+  --color-action-border: #7f90ab;
+  --color-action-from: #f6f8fc;
+  --color-action-to: #c8d3e8;
+  --color-action-hover-from: #ffffff;
+  --color-action-hover-to: #d7e1f3;
+  --color-overlay: rgba(35, 58, 88, 0.45);
+  --color-muted: #5a7698;
+  --color-strong: #1d426f;
+  --color-table-head-bg: #dbe6f8;
+  --color-table-head-border: #9bb1ce;
+  --color-table-cell-border: #c2d1e7;
+  --color-table-row-hover: #eef4ff;
+  --color-kpi-info-bg: #dce6f7;
+  --color-kpi-primary-bg: #e9f0ff;
+  --color-kpi-success-bg: #d8efe3;
+  --color-ring: #284f82;
+  --color-attention-bg: #0d43b8;
+  --color-attention-fg: #ffffff;
   --radius-sm: 6px;
-  --shadow-sm: 0 1px 2px rgba(16,24,40,0.05);
+  --radius-md: 8px;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
   --font-sans: "Segoe UI", Tahoma, sans-serif;
 }
 
-/* Basic helpers that mirror some of the inline tailwind utility usage */
-.ds-window-panel {
-  border: 1px solid var(--color-border);
-  background: var(--color-panel);
-  box-shadow: inset 0 0 0 1px #dce6f7;
-  border-radius: var(--radius-sm);
-}
-.ds-window-title {
-  padding: 0.35rem 0.75rem;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--color-primary);
-  background: linear-gradient(90deg,#dfe8f5,#bacce8);
-  border-bottom: 1px solid #8ca5c9;
-}
-.ds-section-box {
-  background: var(--color-panel-2);
-  border: 1px solid #8aa1c2;
-  padding: 0.75rem;
+[data-theme="modern"] {
+  --color-bg: #f4f6fa;
+  --color-panel: #ffffff;
+  --color-panel-2: #f8fafc;
+  --color-surface: #eef2f7;
+  --color-primary: #111827;
+  --color-secondary: #334155;
+  --color-border: #dbe3ef;
+  --color-border-soft: #e2e8f0;
+  --color-title-from: #f8fafc;
+  --color-title-to: #f8fafc;
+  --color-title-border: #e2e8f0;
+  --color-action-text: #0f172a;
+  --color-action-border: #d2dcec;
+  --color-action-from: #ffffff;
+  --color-action-to: #f8fafc;
+  --color-action-hover-from: #f8fafc;
+  --color-action-hover-to: #f1f5f9;
+  --color-overlay: rgba(15, 23, 42, 0.4);
+  --color-muted: #64748b;
+  --color-strong: #0f172a;
+  --color-table-head-bg: #f1f5f9;
+  --color-table-head-border: #d9e2ef;
+  --color-table-cell-border: #e2e8f0;
+  --color-table-row-hover: #f8fafc;
+  --color-kpi-info-bg: #e8f0fe;
+  --color-kpi-primary-bg: #eef2ff;
+  --color-kpi-success-bg: #e8f7ef;
+  --color-ring: #2563eb;
+  --color-attention-bg: #dbeafe;
+  --color-attention-fg: #1e3a8a;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --font-sans: "Plus Jakarta Sans", "Segoe UI", Tahoma, sans-serif;
 }
 
-body { font-family: var(--font-sans); }
+[data-theme="modern"] input[type="text"],
+[data-theme="modern"] input[type="number"],
+[data-theme="modern"] input[type="password"],
+[data-theme="modern"] input[type="email"],
+[data-theme="modern"] input[type="url"],
+[data-theme="modern"] input[type="date"],
+[data-theme="modern"] input[type="datetime-local"],
+[data-theme="modern"] select,
+[data-theme="modern"] textarea {
+  border-color: #cbd5e1;
+  border-radius: 8px;
+}
+
+[data-theme="modern"] input[type="text"]:focus,
+[data-theme="modern"] input[type="number"]:focus,
+[data-theme="modern"] input[type="password"]:focus,
+[data-theme="modern"] input[type="email"]:focus,
+[data-theme="modern"] input[type="url"]:focus,
+[data-theme="modern"] input[type="date"]:focus,
+[data-theme="modern"] input[type="datetime-local"]:focus,
+[data-theme="modern"] select:focus,
+[data-theme="modern"] textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="modern"] .action-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-primary);
+}

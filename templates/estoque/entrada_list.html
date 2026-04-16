@@ -11,42 +11,42 @@
         <div class="mb-2 flex items-center justify-end">
             <a href="{% url 'entrada_create' %}" class="action-btn w-auto">Registrar Entrada <span>F2</span></a>
         </div>
-        <div class="overflow-x-auto bg-white">
+        <div class="overflow-x-auto themed-table-wrap">
     <table class="min-w-full text-[12px]">
-        <thead class="bg-[#dbe6f8] text-[#27486f]">
+        <thead class="themed-table-head">
             <tr>
-                <th class="px-2 py-1 text-left border border-[#9bb1ce]">Data</th>
-                <th class="px-2 py-1 text-left border border-[#9bb1ce]">Fornecedor</th>
-                <th class="px-2 py-1 text-left border border-[#9bb1ce]">Nota Fiscal</th>
-                <th class="px-2 py-1 text-left border border-[#9bb1ce]">Pedido</th>
-                <th class="px-2 py-1 text-left border border-[#9bb1ce]">Unidade</th>
-                <th class="px-2 py-1 text-left border border-[#9bb1ce]">Setor</th>
-                <th class="px-2 py-1 text-left border border-[#9bb1ce]">Itens</th>
+                <th class="px-2 py-1 text-left themed-th">Data</th>
+                <th class="px-2 py-1 text-left themed-th">Fornecedor</th>
+                <th class="px-2 py-1 text-left themed-th">Nota Fiscal</th>
+                <th class="px-2 py-1 text-left themed-th">Pedido</th>
+                <th class="px-2 py-1 text-left themed-th">Unidade</th>
+                <th class="px-2 py-1 text-left themed-th">Setor</th>
+                <th class="px-2 py-1 text-left themed-th">Itens</th>
             </tr>
         </thead>
         <tbody>
             {% for entrada in entradas %}
-            <tr class="hover:bg-[#eef4ff] transition">
-                <td class="px-2 py-1 whitespace-nowrap border border-[#c2d1e7] text-[#4c6f97]">
+            <tr class="themed-row">
+                <td class="px-2 py-1 whitespace-nowrap themed-td themed-muted">
                     {{ entrada.data_entrada|date:"d/m/Y" }}
                 </td>
-                <td class="px-2 py-1 whitespace-nowrap border border-[#c2d1e7]">
-                    <div class="font-bold text-[#1e4471]">{{ entrada.fornecedor.nome_fantasia }}</div>
-                    <div class="text-[10px] text-[#6b89ad]">{{ entrada.fornecedor.cnpj }}</div>
+                <td class="px-2 py-1 whitespace-nowrap themed-td">
+                    <div class="font-bold themed-strong">{{ entrada.fornecedor.nome_fantasia }}</div>
+                    <div class="text-[10px] themed-muted">{{ entrada.fornecedor.cnpj }}</div>
                 </td>
-                <td class="px-2 py-1 whitespace-nowrap border border-[#c2d1e7] text-[#25466e]">
+                <td class="px-2 py-1 whitespace-nowrap themed-td themed-strong">
                     {{ entrada.numero_nota|default:"S/N" }}
                 </td>
-                <td class="px-2 py-1 whitespace-nowrap border border-[#c2d1e7] text-[#4c6f97]">{{ entrada.numero_pedido|default:"-" }}</td>
-                <td class="px-2 py-1 whitespace-nowrap border border-[#c2d1e7] text-[#4c6f97]">{{ entrada.unidade|default:"-" }}</td>
-                <td class="px-2 py-1 whitespace-nowrap border border-[#c2d1e7] text-[#4c6f97]">{{ entrada.setor|default:"-" }}</td>
-                <td class="px-2 py-1 whitespace-nowrap border border-[#c2d1e7] text-[#4c6f97]">
+                <td class="px-2 py-1 whitespace-nowrap themed-td themed-muted">{{ entrada.numero_pedido|default:"-" }}</td>
+                <td class="px-2 py-1 whitespace-nowrap themed-td themed-muted">{{ entrada.unidade|default:"-" }}</td>
+                <td class="px-2 py-1 whitespace-nowrap themed-td themed-muted">{{ entrada.setor|default:"-" }}</td>
+                <td class="px-2 py-1 whitespace-nowrap themed-td themed-muted">
                     {{ entrada.itens.count }} itens
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" class="px-6 py-12 text-center text-gray-500 border border-[#c2d1e7]">Nenhuma entrada registrada.</td>
+                <td colspan="7" class="px-6 py-12 text-center text-gray-500 themed-td">Nenhuma entrada registrada.</td>
             </tr>
             {% endfor %}
         </tbody>

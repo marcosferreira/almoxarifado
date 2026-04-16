@@ -10,40 +10,40 @@
     <div class="p-2">
         <div class="mb-2 flex items-center justify-between text-[12px]">
             <div class="flex gap-1 flex-wrap">
-                <a href="{% url 'pedido_list' %}" class="action-btn w-auto {% if not status_filter %}ring-1 ring-[#284f82]{% endif %}">Todos</a>
-                <a href="?status=SOLICITADO" class="action-btn w-auto {% if status_filter == 'SOLICITADO' %}ring-1 ring-[#284f82]{% endif %}">Solicitados</a>
-                <a href="?status=RESERVADO" class="action-btn w-auto {% if status_filter == 'RESERVADO' %}ring-1 ring-[#284f82]{% endif %}">Reservados</a>
-                <a href="?status=EMPENHADO" class="action-btn w-auto {% if status_filter == 'EMPENHADO' %}ring-1 ring-[#284f82]{% endif %}">Empenhados</a>
-                <a href="?status=ENTREGUE" class="action-btn w-auto {% if status_filter == 'ENTREGUE' %}ring-1 ring-[#284f82]{% endif %}">Entregues</a>
+                <a href="{% url 'pedido_list' %}" class="action-btn w-auto {% if not status_filter %}themed-ring{% endif %}">Todos</a>
+                <a href="?status=SOLICITADO" class="action-btn w-auto {% if status_filter == 'SOLICITADO' %}themed-ring{% endif %}">Solicitados</a>
+                <a href="?status=RESERVADO" class="action-btn w-auto {% if status_filter == 'RESERVADO' %}themed-ring{% endif %}">Reservados</a>
+                <a href="?status=EMPENHADO" class="action-btn w-auto {% if status_filter == 'EMPENHADO' %}themed-ring{% endif %}">Empenhados</a>
+                <a href="?status=ENTREGUE" class="action-btn w-auto {% if status_filter == 'ENTREGUE' %}themed-ring{% endif %}">Entregues</a>
             </div>
             <a href="{% url 'pedido_create' %}" class="action-btn w-auto">Incluir Novo <span>F2</span></a>
         </div>
 
-        <div class="overflow-x-auto bg-white">
+        <div class="overflow-x-auto themed-table-wrap">
     <table class="min-w-full text-[11px]">
-        <thead class="bg-[#dbe6f8] font-bold text-[#27486f] uppercase tracking-tighter">
+        <thead class="themed-table-head font-bold uppercase tracking-tighter">
             <tr>
-                <th class="px-2 py-1 text-left border border-[#9bb1ce] w-16">Código</th>
-                <th class="px-2 py-1 text-left border border-[#9bb1ce]">Unidade / Secretaria</th>
-                <th class="px-2 py-1 text-left border border-[#9bb1ce]">Data Hora</th>
-                <th class="px-2 py-1 text-left border border-[#9bb1ce]">Status</th>
-                <th class="px-2 py-1 text-right border border-[#9bb1ce]">Ações</th>
+                <th class="px-2 py-1 text-left themed-th w-16">Código</th>
+                <th class="px-2 py-1 text-left themed-th">Unidade / Secretaria</th>
+                <th class="px-2 py-1 text-left themed-th">Data Hora</th>
+                <th class="px-2 py-1 text-left themed-th">Status</th>
+                <th class="px-2 py-1 text-right themed-th">Ações</th>
             </tr>
         </thead>
         <tbody>
             {% for pedido in pedidos %}
-            <tr class="hover:bg-[#eef4ff] transition cursor-pointer" onclick="window.location='{% url 'pedido_detail' pedido.pk %}'">
-                <td class="px-2 py-1 whitespace-nowrap font-bold text-[#1e4471] border border-[#c2d1e7]">
+            <tr class="themed-row cursor-pointer" onclick="window.location='{% url 'pedido_detail' pedido.pk %}'">
+                <td class="px-2 py-1 whitespace-nowrap font-bold themed-strong themed-td">
                     #{{ pedido.id|stringformat:"04d" }}
                 </td>
-                <td class="px-2 py-1 whitespace-nowrap font-bold text-[#25466e] border border-[#c2d1e7]">
+                <td class="px-2 py-1 whitespace-nowrap font-bold themed-strong themed-td">
                     {{ pedido.secretaria|upper }}
-                    {% if pedido.setor %}<span class="text-[9px] text-[#58789f] block">{{ pedido.setor|upper }}</span>{% endif %}
+                    {% if pedido.setor %}<span class="text-[9px] themed-muted block">{{ pedido.setor|upper }}</span>{% endif %}
                 </td>
-                <td class="px-2 py-1 whitespace-nowrap text-[#557499] border border-[#c2d1e7]">
+                <td class="px-2 py-1 whitespace-nowrap themed-muted themed-td">
                     {{ pedido.data_pedido|date:"d/m/Y H:i" }}
                 </td>
-                <td class="px-2 py-1 whitespace-nowrap border border-[#c2d1e7]">
+                <td class="px-2 py-1 whitespace-nowrap themed-td">
                     <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase
                         {% if pedido.status == 'ENTREGUE' %}bg-green-100 text-green-800 border border-green-200
                         {% elif pedido.status == 'EMPENHADO' %}bg-indigo-100 text-indigo-800 border border-indigo-200
@@ -53,13 +53,13 @@
                         {{ pedido.get_status_display }}
                     </span>
                 </td>
-                <td class="px-2 py-1 whitespace-nowrap text-right font-bold text-[#1d4a7d] uppercase border border-[#c2d1e7]">
+                <td class="px-2 py-1 whitespace-nowrap text-right font-bold uppercase themed-td" style="color: var(--color-strong);">
                     Gerenciar ➔
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="5" class="px-4 py-10 text-center text-gray-500 border border-[#c2d1e7]">Nenhum registro encontrado para os critérios informados.</td>
+                <td colspan="5" class="px-4 py-10 text-center text-gray-500 themed-td">Nenhum registro encontrado para os critérios informados.</td>
             </tr>
             {% endfor %}
         </tbody>

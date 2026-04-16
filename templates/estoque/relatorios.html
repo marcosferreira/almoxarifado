@@ -31,44 +31,44 @@
                 </div>
             </div>
 
-            <div class="window-panel overflow-x-auto bg-white">
+            <div class="window-panel overflow-x-auto themed-table-wrap">
                 <table class="min-w-full text-[12px]">
-                    <thead class="bg-[#dbe6f8] text-[#27486f]">
+                    <thead class="themed-table-head">
                         <tr>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-left">Categoria</th>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-right">Entradas (Qtd)</th>
+                            <th class="px-2 py-1 themed-th text-left">Categoria</th>
+                            <th class="px-2 py-1 themed-th text-right">Entradas (Qtd)</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for grupo in entradas_por_grupo %}
-                        <tr>
-                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ grupo.produto__categoria__nome|default:"Sem categoria" }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">{{ grupo.total_quantidade }}</td>
+                        <tr class="themed-row">
+                            <td class="px-2 py-1 themed-td">{{ grupo.produto__categoria__nome|default:"Sem categoria" }}</td>
+                            <td class="px-2 py-1 themed-td text-right">{{ grupo.total_quantidade }}</td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="2" class="px-2 py-4 border border-[#c2d1e7] text-center">Sem dados para o período.</td></tr>
+                        <tr><td colspan="2" class="px-2 py-4 themed-td text-center">Sem dados para o período.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
 
-            <div class="window-panel overflow-x-auto bg-white">
+            <div class="window-panel overflow-x-auto themed-table-wrap">
                 <div class="window-title">Consumo por Secretaria</div>
                 <table class="min-w-full text-[12px]">
-                    <thead class="bg-[#dbe6f8] text-[#27486f]">
+                    <thead class="themed-table-head">
                         <tr>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-left">Secretaria</th>
-                            <th class="px-2 py-1 border border-[#9bb1ce] text-right">Total Itens</th>
+                            <th class="px-2 py-1 themed-th text-left">Secretaria</th>
+                            <th class="px-2 py-1 themed-th text-right">Total Itens</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in consumo_secretaria %}
-                        <tr>
-                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ item.pedido__secretaria }}</td>
-                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">{{ item.total_itens }}</td>
+                        <tr class="themed-row">
+                            <td class="px-2 py-1 themed-td">{{ item.pedido__secretaria }}</td>
+                            <td class="px-2 py-1 themed-td text-right">{{ item.total_itens }}</td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="2" class="px-2 py-4 border border-[#c2d1e7] text-center">Nenhum consumo registrado.</td></tr>
+                        <tr><td colspan="2" class="px-2 py-4 themed-td text-center">Nenhum consumo registrado.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>

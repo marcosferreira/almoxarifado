@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Almoxarifado - Dona Inês{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}">
     <script defer src="{% static 'js/ui.js' %}"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -43,19 +46,37 @@
                 @apply block text-[9px] text-gray-400 mt-1;
             }
             .window-panel {
-                @apply border border-[#7f9db9] bg-[#b9c7df] shadow-[inset_0_0_0_1px_#dce6f7];
+                border: 1px solid var(--color-border);
+                background: var(--color-panel);
+                box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-border) 30%, white), var(--shadow-sm);
+                border-radius: var(--radius-sm);
             }
             .window-title {
-                @apply px-3 py-1 text-[12px] font-bold text-[#21416b] bg-gradient-to-r from-[#dfe8f5] to-[#bacce8] border-b border-[#8ca5c9];
+                @apply px-3 py-1 text-[12px] font-bold;
+                color: var(--color-secondary);
+                background: linear-gradient(to right, var(--color-title-from), var(--color-title-to));
+                border-bottom: 1px solid var(--color-title-border);
             }
             .section-box {
-                @apply bg-[#aebdd7] border border-[#8aa1c2] p-3;
+                @apply p-3;
+                background: var(--color-panel-2);
+                border: 1px solid var(--color-border-soft);
+                border-radius: var(--radius-sm);
             }
             .action-btn {
-                @apply w-full flex items-center justify-between gap-2 px-3 py-1.5 text-[11px] border border-[#7f90ab] bg-gradient-to-b from-[#f6f8fc] to-[#c8d3e8] text-[#243c5a] font-semibold hover:from-[#ffffff] hover:to-[#d7e1f3] active:translate-y-px;
+                @apply w-full flex items-center justify-between gap-2 px-3 py-1.5 text-[11px] font-semibold active:translate-y-px;
+                border: 1px solid var(--color-action-border);
+                background: linear-gradient(to bottom, var(--color-action-from), var(--color-action-to));
+                color: var(--color-action-text);
+                border-radius: var(--radius-sm);
+                box-shadow: var(--shadow-sm);
+            }
+            .action-btn:hover {
+                background: linear-gradient(to bottom, var(--color-action-hover-from), var(--color-action-hover-to));
             }
             .erp-modal-overlay {
-                @apply fixed inset-0 bg-[#233a58]/45 z-[70] flex items-start justify-center p-4 md:p-8;
+                @apply fixed inset-0 z-[70] flex items-start justify-center p-4 md:p-8;
+                background: var(--color-overlay);
             }
             .erp-modal-window {
                 @apply window-panel w-full max-w-4xl mt-4 md:mt-10 shadow-2xl;
@@ -64,24 +85,77 @@
                 @apply window-title flex items-center justify-between;
             }
             .erp-modal-body {
-                @apply p-3 bg-[#b9c7df] text-[12px] text-[#1d3a5f];
+                @apply p-3 text-[12px];
+                background: var(--color-panel);
+                color: var(--color-secondary);
             }
         }
     </style>
     <style>
         [x-cloak] { display: none !important; }
-        body {
-            font-family: "Segoe UI", Tahoma, sans-serif;
+        .app-shell-header {
+            border-bottom: 1px solid var(--color-border);
+            background: linear-gradient(to bottom, var(--color-title-from), color-mix(in srgb, var(--color-title-to) 80%, var(--color-bg)));
+            color: var(--color-primary);
+        }
+        .app-shell-left {
+            background: var(--color-bg);
+            border-right: 1px solid var(--color-border-soft);
+        }
+        .app-shell-right {
+            background: var(--color-surface);
+            border-left: 1px solid var(--color-border-soft);
+        }
+        .themed-table-wrap {
+            background: var(--color-panel);
+        }
+        .themed-table-head {
+            background: var(--color-table-head-bg);
+            color: var(--color-secondary);
+        }
+        .themed-th {
+            border: 1px solid var(--color-table-head-border);
+        }
+        .themed-td {
+            border: 1px solid var(--color-table-cell-border);
+        }
+        .themed-row {
+            transition: background 150ms ease;
+        }
+        .themed-row:hover {
+            background: var(--color-table-row-hover);
+        }
+        .themed-strong {
+            color: var(--color-strong);
+        }
+        .themed-muted {
+            color: var(--color-muted);
+        }
+        .themed-ring {
+            box-shadow: 0 0 0 1px var(--color-ring) inset;
+        }
+        .kpi-info {
+            background: var(--color-kpi-info-bg);
+        }
+        .kpi-primary {
+            background: var(--color-kpi-primary-bg);
+        }
+        .kpi-success {
+            background: var(--color-kpi-success-bg);
+        }
+        .themed-attention {
+            background: var(--color-attention-bg);
+            color: var(--color-attention-fg);
         }
     </style>
 </head>
-<body class="bg-[#b6c3dd] min-h-screen" x-data="{ sidebarOpen: false, supportOpen: false }">
-    <header class="h-10 border-b border-[#7f9db9] bg-gradient-to-b from-[#dfe8f5] to-[#b7c8e2] px-3 flex items-center justify-between text-[#16345b]">
+<body data-theme="{{ current_theme|default:'classic' }}" class="min-h-screen" x-data="{ sidebarOpen: false, supportOpen: false }">
+    <header class="app-shell-header h-10 px-3 flex items-center justify-between">
         <div class="flex items-center gap-3 text-[13px] font-bold">
-            <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-xs px-2 py-0.5 border border-[#7f9db9] bg-white">Menu</button>
+            <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-xs px-2 py-0.5 border rounded" style="border-color: var(--color-border); background: white;">Menu</button>
             <img src="{% static 'images/logo.png' %}" alt="Brasao de Dona Ines" class="h-7 w-auto object-contain" loading="lazy">
             <span>201075 - PREFEITURA MUNICIPAL DE DONA INÊS</span>
-            <span class="hidden lg:inline text-[11px] text-[#2c5586]">{% block breadcrumb %}Início{% endblock %}</span>
+            <span class="hidden lg:inline text-[11px]" style="color: var(--color-secondary);">{% block breadcrumb %}Início{% endblock %}</span>
         </div>
         <div class="text-[11px] font-semibold flex items-center gap-3">
             <span class="hidden sm:inline">Usuário: {{ user.username|default:"Master" }}</span>
@@ -95,10 +169,10 @@
     </header>
 
     <div class="flex min-h-[calc(100vh-40px)]">
-        <aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}" class="fixed md:static z-40 md:translate-x-0 top-10 bottom-0 left-0 w-64 bg-[#b6c3dd] border-r border-[#8ea6c8] p-2 space-y-3 overflow-y-auto transition-transform duration-200">
+        <aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}" class="app-shell-left fixed md:static z-40 md:translate-x-0 top-10 bottom-0 left-0 w-64 p-2 space-y-3 overflow-y-auto transition-transform duration-200">
             <div class="flex items-center gap-2 px-2 mb-2">
                 <img src="{% static 'images/logo.png' %}" alt="logo" class="h-10 w-auto object-contain">
-                <div class="text-sm font-bold text-[#16345b]">Almoxarifado</div>
+                <div class="text-sm font-bold" style="color: var(--color-primary);">Almoxarifado</div>
             </div>
             <details open class="window-panel">
                 <summary class="window-title cursor-pointer">Principal</summary>
@@ -160,12 +234,12 @@
             </div>
         </main>
 
-        <aside class="hidden xl:block w-56 border-l border-[#8ea6c8] bg-[#e7edf7]">
+        <aside class="app-shell-right hidden xl:block w-56">
             <div class="window-title flex items-center gap-2">
                 <img src="{% static 'images/logo.png' %}" alt="Brasao de Dona Ines" class="h-5 w-auto object-contain" loading="lazy">
                 <span>Suporte</span>
             </div>
-            <div class="p-5 text-center text-[13px] space-y-6 text-[#27486f]">
+            <div class="p-5 text-center text-[13px] space-y-6" style="color: var(--color-secondary);">
                 <div>
                     <div class="text-4xl">🧰</div>
                     <p>Abrir Chamado (Ticket)</p>

@@ -12,8 +12,8 @@
         <div class="flex-1 space-y-2">
             <div class="section-box">
                 <div class="flex gap-1 text-[11px] mb-3">
-                    <button type="button" class="action-btn w-auto" :class="aba === 'dados' ? 'ring-1 ring-[#284f82]' : ''" @click="aba = 'dados'">Dados Cadastrais</button>
-                    <button type="button" class="action-btn w-auto" :class="aba === 'senha' ? 'ring-1 ring-[#284f82]' : ''" @click="aba = 'senha'">Alterar Senha</button>
+                    <button type="button" class="action-btn w-auto" :class="aba === 'dados' ? 'themed-ring' : ''" @click="aba = 'dados'">Dados Cadastrais</button>
+                    <button type="button" class="action-btn w-auto" :class="aba === 'senha' ? 'themed-ring' : ''" @click="aba = 'senha'">Alterar Senha</button>
                 </div>
 
                 <div x-show="aba === 'dados'" class="space-y-2">
@@ -36,6 +36,10 @@
                         <div>
                             <label>Sobrenome</label>
                             {{ perfil_form.last_name }}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label>Tema da Interface</label>
+                            {{ tema_form.tema_ui }}
                         </div>
 
                         <div class="md:col-span-2 pt-2 flex justify-end">

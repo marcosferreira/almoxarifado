@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -5,39 +6,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Almoxarifado Dona Inês</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">
+        @layer base {
+            input[type="text"],
+            input[type="password"] {
+                @apply mt-1 block w-full px-2 py-1.5 bg-white border border-gray-300 rounded shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-xs transition duration-150 ease-in-out;
+            }
+            label {
+                @apply block text-[10px] font-bold text-gray-500 uppercase mb-0.5 tracking-tight;
+            }
+        }
+        @layer components {
+            .window-panel {
+                @apply border border-[#7f9db9] bg-[#b9c7df] shadow-[inset_0_0_0_1px_#dce6f7];
+            }
+            .window-title {
+                @apply px-3 py-1 text-[12px] font-bold text-[#21416b] bg-gradient-to-r from-[#dfe8f5] to-[#bacce8] border-b border-[#8ca5c9];
+            }
+            .section-box {
+                @apply bg-[#aebdd7] border border-[#8aa1c2] p-3;
+            }
+            .action-btn {
+                @apply w-full flex items-center justify-center gap-2 px-3 py-1.5 text-[11px] border border-[#7f90ab] bg-gradient-to-b from-[#f6f8fc] to-[#c8d3e8] text-[#243c5a] font-semibold hover:from-[#ffffff] hover:to-[#d7e1f3] active:translate-y-px;
+            }
+        }
+    </style>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, sans-serif;
+        }
+    </style>
 </head>
-<body class="bg-blue-900 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-blue-900">📦 Almoxarifado</h1>
-            <p class="text-gray-500 mt-2">Prefeitura Municipal de Dona Inês</p>
+<body class="bg-[#b6c3dd] min-h-screen">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="window-panel w-full max-w-md">
+            <div class="window-title">Acesso ao Sistema</div>
+            <div class="p-3 space-y-3">
+                <div class="section-box text-center">
+                    <img src="{% static 'images/logo.png' %}" alt="Brasao de Dona Ines" class="h-24 w-auto mx-auto object-contain" loading="eager">
+                    <h1 class="mt-2 text-[16px] font-bold text-[#17355d] uppercase tracking-tight">Almoxarifado</h1>
+                    <p class="text-[11px] text-[#365681]">Prefeitura Municipal de Dona Ines</p>
+                </div>
+
+                <form method="post" class="section-box space-y-3">
+                    {% csrf_token %}
+                    <div>
+                        <label for="id_username">Usuario</label>
+                        <input type="text" name="username" id="id_username" required autocomplete="username" autofocus>
+                    </div>
+                    <div>
+                        <label for="id_password">Senha</label>
+                        <input type="password" name="password" id="id_password" required autocomplete="current-password">
+                    </div>
+
+                    {% if form.errors %}
+                    <div class="p-2 bg-red-50 text-red-700 text-[11px] border border-red-200">
+                        Usuario ou senha incorretos.
+                    </div>
+                    {% endif %}
+
+                    <button type="submit" class="action-btn">Entrar no Sistema</button>
+                </form>
+
+                <div class="text-center text-[10px] text-[#4c6f97]">
+                    201075 - Prefeitura Municipal de Dona Ines
+                </div>
+            </div>
         </div>
-
-        <form method="post">
-            {% csrf_token %}
-            <div class="space-y-4">
-                <div>
-                    <label for="id_username" class="block text-sm font-medium text-gray-700">Usuário</label>
-                    <input type="text" name="username" id="id_username" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="id_password" class="block text-sm font-medium text-gray-700">Senha</label>
-                    <input type="password" name="password" id="id_password" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-            </div>
-
-            {% if form.errors %}
-            <div class="mt-4 p-2 bg-red-50 text-red-700 text-sm rounded border border-red-200">
-                Usuário ou senha incorretos.
-            </div>
-            {% endif %}
-
-            <button type="submit" class="w-full mt-6 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition font-semibold">
-                Entrar no Sistema
-            </button>
-        </form>
     </div>
 </body>
 </html>

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -76,6 +77,7 @@
     <header class="h-10 border-b border-[#7f9db9] bg-gradient-to-b from-[#dfe8f5] to-[#b7c8e2] px-3 flex items-center justify-between text-[#16345b]">
         <div class="flex items-center gap-3 text-[13px] font-bold">
             <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-xs px-2 py-0.5 border border-[#7f9db9] bg-white">Menu</button>
+            <img src="{% static 'images/logo.png' %}" alt="Brasao de Dona Ines" class="h-7 w-auto object-contain" loading="lazy">
             <span>201075 - PREFEITURA MUNICIPAL DE DONA INÊS</span>
             <span class="hidden lg:inline text-[11px] text-[#2c5586]">{% block breadcrumb %}Início{% endblock %}</span>
         </div>
@@ -153,7 +155,10 @@
         </main>
 
         <aside class="hidden xl:block w-56 border-l border-[#8ea6c8] bg-[#e7edf7]">
-            <div class="window-title">Suporte</div>
+            <div class="window-title flex items-center gap-2">
+                <img src="{% static 'images/logo.png' %}" alt="Brasao de Dona Ines" class="h-5 w-auto object-contain" loading="lazy">
+                <span>Suporte</span>
+            </div>
             <div class="p-5 text-center text-[13px] space-y-6 text-[#27486f]">
                 <div>
                     <div class="text-4xl">🧰</div>

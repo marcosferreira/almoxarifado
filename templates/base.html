@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Almoxarifado - Dona Inês{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}">
+    <script defer src="{% static 'js/ui.js' %}"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style type="text/tailwindcss">
         @layer base {
@@ -94,6 +96,10 @@
 
     <div class="flex min-h-[calc(100vh-40px)]">
         <aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}" class="fixed md:static z-40 md:translate-x-0 top-10 bottom-0 left-0 w-64 bg-[#b6c3dd] border-r border-[#8ea6c8] p-2 space-y-3 overflow-y-auto transition-transform duration-200">
+            <div class="flex items-center gap-2 px-2 mb-2">
+                <img src="{% static 'images/logo.png' %}" alt="logo" class="h-10 w-auto object-contain">
+                <div class="text-sm font-bold text-[#16345b]">Almoxarifado</div>
+            </div>
             <details open class="window-panel">
                 <summary class="window-title cursor-pointer">Principal</summary>
                 <div class="p-3 text-[13px] space-y-2">

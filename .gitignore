@@ -9,8 +9,11 @@ wheels/
 # Django
 db.sqlite3
 *.log
-staticfiles/
-media/
+staticfiles/*
+media/*
+
+!staticfiles/.gitkeep
+!media/.gitkeep
 
 # Virtual environments
 .venv

@@ -11,6 +11,24 @@ Este projeto utiliza uma stack moderna baseada em Python e Django, focada em pro
 - **Gerenciador de Pacotes:** [uv](https://github.com/astral-sh/uv)
 - **Configuração:** [python-dotenv](https://github.com/theskumar/python-dotenv)
 
+## 🎛️ Temas de UI por Usuário
+
+O sistema agora possui tema de interface por perfil de usuário:
+
+- `classic`: mantém o visual ERP tradicional.
+- `modern`: visual atualizado com tokens de design e melhor contraste.
+
+Como usar:
+
+1. Acesse `Perfil` no cabeçalho.
+2. Altere `Tema da Interface`.
+3. Salve os dados para persistir a preferência no perfil.
+
+Notas técnicas:
+
+- A preferência é salva em `PerfilUsuario.tema_ui`.
+- Usuários existentes recebem perfil automaticamente pela migração de backfill.
+
 ## 📋 Requisitos Funcionais (RF)
 
 O sistema deve atender às seguintes funcionalidades essenciais:

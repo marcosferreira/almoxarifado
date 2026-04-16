@@ -8,6 +8,7 @@ from .models import (
     Pedido,
     ItemPedido,
     Categoria,
+    PerfilUsuario,
 )
 
 
@@ -99,6 +100,12 @@ class PerfilUsuarioForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ["first_name", "last_name", "email"]
+
+
+class PerfilTemaForm(forms.ModelForm):
+    class Meta:
+        model = PerfilUsuario
+        fields = ["tema_ui"]
 
 
 ItemEntradaFormSet = forms.inlineformset_factory(

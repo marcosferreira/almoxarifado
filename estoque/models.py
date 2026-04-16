@@ -1,5 +1,35 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.utils import timezone
+
+
+class PerfilUsuario(models.Model):
+    TEMA_CLASSIC = "classic"
+    TEMA_MODERN = "modern"
+    TEMA_CHOICES = [
+        (TEMA_CLASSIC, "Classico (ERP)"),
+        (TEMA_MODERN, "Moderno"),
+    ]
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="perfil_usuario",
+        verbose_name="Usuario",
+    )
+    tema_ui = models.CharField(
+        max_length=20,
+        choices=TEMA_CHOICES,
+        default=TEMA_CLASSIC,
+        verbose_name="Tema da Interface",
+    )
+
+    class Meta:
+        verbose_name = "Perfil de Usuario"
+        verbose_name_plural = "Perfis de Usuario"
+
+    def __str__(self):
+        return f"Perfil de {self.user.username}"
 
 
 class Categoria(models.Model):

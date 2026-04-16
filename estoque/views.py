@@ -6,7 +6,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
-from .models import Produto, Pedido, Fornecedor, Entrada, ItemEntrada, ItemPedido
+from .models import (
+    Produto,
+    Pedido,
+    Fornecedor,
+    Entrada,
+    ItemEntrada,
+    ItemPedido,
+    PerfilUsuario,
+)
 from .forms import (
     ProdutoForm,
     FornecedorForm,
@@ -16,6 +24,7 @@ from .forms import (
     ItemPedidoFormSet,
     AnexoEmpenhoForm,
     PerfilUsuarioForm,
+    PerfilTemaForm,
 )
 
 
@@ -275,14 +284,17 @@ def importar_licitacao(request):
 
 @login_required
 def profile(request):
+    perfil_usuario, _ = PerfilUsuario.objects.get_or_create(user=request.user)
     perfil_form = PerfilUsuarioForm(request.POST or None, instance=request.user)
+    tema_form = PerfilTemaForm(request.POST or None, instance=perfil_usuario)
     senha_form = PasswordChangeForm(user=request.user, data=request.POST or None)
 
     if request.method == "POST":
         acao = request.POST.get("acao")
         if acao == "dados":
-            if perfil_form.is_valid():
+            if perfil_form.is_valid() and tema_form.is_valid():
                 perfil_form.save()
+                tema_form.save()
                 messages.success(request, "Perfil atualizado com sucesso.")
                 return redirect("profile")
             messages.error(request, "Revise os dados do perfil e tente novamente.")
@@ -300,6 +312,7 @@ def profile(request):
         "registration/profile.html",
         {
             "perfil_form": perfil_form,
+            "tema_form": tema_form,
             "senha_form": senha_form,
         },
     )

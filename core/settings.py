@@ -39,7 +39,9 @@ USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
 
 # CSRF settings
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost,http://127.0.0.1").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS", "http://localhost,http://127.0.0.1"
+).split(",")
 # Add any domain in ALLOWED_HOSTS to CSRF_TRUSTED_ORIGINS automatically
 for host in ALLOWED_HOSTS:
     if host and host != "*":
@@ -62,7 +64,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware", # Added for static files
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Added for static files
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -84,6 +86,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "estoque.context_processors.tema_ui_context",
             ],
         },
     },

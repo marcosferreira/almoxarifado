@@ -1,0 +1,65 @@
+<div class="w-full xl:w-40 space-y-2">
+    {% if save_form_id or save_click or save_onclick or save_url %}
+        {% if save_url %}
+        <a href="{{ save_url }}" class="action-btn">💾 Salvar <span>F7</span></a>
+        {% else %}
+        <button type="{% if save_form_id %}submit{% else %}button{% endif %}" class="action-btn" {% if save_form_id %}form="{{ save_form_id }}"{% endif %} {% if save_click %}x-on:click="{{ save_click }}"{% endif %} {% if save_onclick %}onclick="{{ save_onclick }}"{% endif %}>💾 Salvar <span>F7</span></button>
+        {% endif %}
+    {% endif %}
+
+    {% if include_url or include_click or include_onclick %}
+        {% if include_url %}
+        <a href="{{ include_url }}" class="action-btn">📄 Incluir <span>F2</span></a>
+        {% else %}
+        <button type="button" class="action-btn" {% if include_click %}x-on:click="{{ include_click }}"{% endif %} {% if include_onclick %}onclick="{{ include_onclick }}"{% endif %}>📄 Incluir <span>F2</span></button>
+        {% endif %}
+    {% endif %}
+
+    {% if alter_url or alter_click or alter_onclick %}
+        {% if alter_url %}
+        <a href="{{ alter_url }}" class="action-btn">✏ Alterar <span>F3</span></a>
+        {% else %}
+        <button type="button" class="action-btn" {% if alter_click %}x-on:click="{{ alter_click }}"{% endif %} {% if alter_onclick %}onclick="{{ alter_onclick }}"{% endif %}>✏ Alterar <span>F3</span></button>
+        {% endif %}
+    {% endif %}
+
+    {% if delete_url or delete_click or delete_onclick %}
+        {% if delete_url %}
+        <a href="{{ delete_url }}" class="action-btn">🗑 Excluir <span>F4</span></a>
+        {% else %}
+        <button type="button" class="action-btn" {% if delete_click %}x-on:click="{{ delete_click }}"{% endif %} {% if delete_onclick %}onclick="{{ delete_onclick }}"{% endif %}>🗑 Excluir <span>F4</span></button>
+        {% endif %}
+    {% endif %}
+
+    {% if consulta_url or consulta_click or consulta_onclick %}
+        {% if consulta_url %}
+        <a href="{{ consulta_url }}" class="action-btn">🔍 Consulta <span>F5</span></a>
+        {% else %}
+        <button type="button" class="action-btn" {% if consulta_click %}x-on:click="{{ consulta_click }}"{% endif %} {% if consulta_onclick %}onclick="{{ consulta_onclick }}"{% endif %}>🔍 Consulta <span>F5</span></button>
+        {% endif %}
+    {% endif %}
+
+    {% if cancel_url or cancel_click or cancel_onclick %}
+        {% if cancel_url %}
+        <a href="{{ cancel_url }}" class="action-btn">⛔ Cancelar <span>F6</span></a>
+        {% else %}
+        <button type="button" class="action-btn" {% if cancel_click %}x-on:click="{{ cancel_click }}"{% endif %} {% if cancel_onclick %}onclick="{{ cancel_onclick }}"{% endif %}>⛔ Cancelar <span>F6</span></button>
+        {% endif %}
+    {% endif %}
+
+    {% if print_url or print_click or print_onclick %}
+        {% if print_url %}
+        <a href="{{ print_url }}" class="action-btn">🖨 Imprimir <span>F8</span></a>
+        {% else %}
+        <button type="button" class="action-btn" {% if print_click %}x-on:click="{{ print_click }}"{% endif %} {% if print_onclick %}onclick="{{ print_onclick }}"{% endif %}>🖨 Imprimir <span>F8</span></button>
+        {% endif %}
+    {% endif %}
+
+    {% if close_url or close_click or close_onclick %}
+        {% if close_url %}
+        <a href="{{ close_url }}" class="action-btn">🚪 Fechar <span>Esc</span></a>
+        {% else %}
+        <button type="button" class="action-btn" {% if close_click %}x-on:click="{{ close_click }}"{% endif %} {% if close_onclick %}onclick="{{ close_onclick }}"{% endif %}>🚪 Fechar <span>Esc</span></button>
+        {% endif %}
+    {% endif %}
+</div>

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Importar Licitações{% endblock %}
+
+{% block breadcrumb %}Diversos > Importar Licitações{% endblock %}
+
+{% block content %}
+<div class="window-panel max-w-4xl">
+    <div class="window-title">Importar Licitações</div>
+    <div class="p-3 space-y-3 text-[12px]">
+        <form method="post" enctype="multipart/form-data" class="space-y-3">
+            {% csrf_token %}
+            <div class="section-box grid grid-cols-1 md:grid-cols-[1fr_42px] gap-2 items-center">
+                <input type="file" name="arquivo" required>
+                <button type="button" class="action-btn justify-center">...</button>
+            </div>
+
+            <div class="section-box grid grid-cols-1 md:grid-cols-[1fr_160px] gap-2 items-center">
+                <div>
+                    <label>Grupo</label>
+                    <input type="text" value="INDEFINIDO">
+                </div>
+                <div class="space-y-2">
+                    <button type="submit" class="action-btn">Importar Licitação <span></span></button>
+                    <button type="button" class="action-btn">Importar Contratos <span></span></button>
+                    <button type="button" class="action-btn">Importar Aditivos <span></span></button>
+                    <a href="{% url 'dashboard' %}" class="action-btn justify-center">Fechar</a>
+                </div>
+            </div>
+
+            <div class="section-box min-h-[300px] bg-white/80 border-[#7f9db9]"></div>
+            <div class="border border-[#7f9db9] bg-white text-center py-1">0%</div>
+        </form>
+    </div>
+</div>
+{% endblock %}

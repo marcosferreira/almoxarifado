@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil do Usuário{% endblock %}
+
+{% block breadcrumb %}Sistema > Perfil do Usuário{% endblock %}
+
+{% block content %}
+{% url 'dashboard' as dashboard_url %}
+<div class="window-panel" x-data="profileUi()">
+    <div class="window-title">Perfil do Usuário</div>
+    <div class="p-2 flex flex-col xl:flex-row gap-3">
+        <div class="flex-1 space-y-2">
+            <div class="section-box">
+                <div class="flex gap-1 text-[11px] mb-3">
+                    <button type="button" class="action-btn w-auto" :class="aba === 'dados' ? 'ring-1 ring-[#284f82]' : ''" @click="aba = 'dados'">Dados Cadastrais</button>
+                    <button type="button" class="action-btn w-auto" :class="aba === 'senha' ? 'ring-1 ring-[#284f82]' : ''" @click="aba = 'senha'">Alterar Senha</button>
+                </div>
+
+                <div x-show="aba === 'dados'" class="space-y-2">
+                    <form method="post" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[12px]">
+                        {% csrf_token %}
+                        <input type="hidden" name="acao" value="dados">
+
+                        <div>
+                            <label>Usuário</label>
+                            <input type="text" value="{{ request.user.username }}" disabled class="bg-white/80">
+                        </div>
+                        <div>
+                            <label>E-mail</label>
+                            {{ perfil_form.email }}
+                        </div>
+                        <div>
+                            <label>Nome</label>
+                            {{ perfil_form.first_name }}
+                        </div>
+                        <div>
+                            <label>Sobrenome</label>
+                            {{ perfil_form.last_name }}
+                        </div>
+
+                        <div class="md:col-span-2 pt-2 flex justify-end">
+                            <button type="submit" class="action-btn w-auto">Salvar Dados <span>F7</span></button>
+                        </div>
+                    </form>
+                </div>
+
+                <div x-show="aba === 'senha'" x-cloak class="space-y-2">
+                    <form method="post" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[12px]">
+                        {% csrf_token %}
+                        <input type="hidden" name="acao" value="senha">
+
+                        <div class="md:col-span-2">
+                            <label>Senha Atual</label>
+                            {{ senha_form.old_password }}
+                            {% if senha_form.old_password.errors %}
+                            <p class="text-[11px] text-red-700 mt-1">{{ senha_form.old_password.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label>Nova Senha</label>
+                            {{ senha_form.new_password1 }}
+                            {% if senha_form.new_password1.errors %}
+                            <p class="text-[11px] text-red-700 mt-1">{{ senha_form.new_password1.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label>Confirmação da Nova Senha</label>
+                            {{ senha_form.new_password2 }}
+                            {% if senha_form.new_password2.errors %}
+                            <p class="text-[11px] text-red-700 mt-1">{{ senha_form.new_password2.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        {% if senha_form.non_field_errors %}
+                        <div class="md:col-span-2 text-[11px] text-red-700">
+                            {{ senha_form.non_field_errors.0 }}
+                        </div>
+                        {% endif %}
+
+                        <div class="md:col-span-2 pt-2 flex justify-end">
+                            <button type="submit" class="action-btn w-auto">Alterar Senha <span>F7</span></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            {% include 'components/action_sidebar_standard.html' with save_click='submitAbaAtual()' include_click="aba = 'dados'" alter_click="aba = 'senha'" print_onclick='window.print()' close_url=dashboard_url %}
+            <a href="{% url 'logout' %}" onclick="event.preventDefault(); document.getElementById('logout-profile').submit();" class="action-btn">⛔ Sair <span></span></a>
+        </div>
+    </div>
+</div>
+
+<form id="logout-profile" action="{% url 'logout' %}" method="post" class="hidden">
+    {% csrf_token %}
+</form>
+
+<script>
+    function profileUi() {
+        return {
+            aba: 'dados',
+            submitAbaAtual() {
+                const seletor = this.aba === 'dados' ? 'dados' : 'senha';
+                const form = document.querySelector(`form input[name="acao"][value="${seletor}"]`)?.closest('form');
+                if (form) {
+                    form.submit();
+                }
+            }
+        }
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'F7') {
+            e.preventDefault();
+            const root = document.querySelector('[x-data^="profileUi"]');
+            if (root && root.__x) {
+                root.__x.$data.submitAbaAtual();
+            }
+        }
+        if (e.key === 'F2') {
+            e.preventDefault();
+            const root = document.querySelector('[x-data^="profileUi"]');
+            if (root && root.__x) {
+                root.__x.$data.aba = 'dados';
+            }
+        }
+        if (e.key === 'F3') {
+            e.preventDefault();
+            const root = document.querySelector('[x-data^="profileUi"]');
+            if (root && root.__x) {
+                root.__x.$data.aba = 'senha';
+            }
+        }
+        if (e.key === 'Escape') {
+            window.location.href = "{% url 'dashboard' %}";
+        }
+    });
+</script>
+{% endblock %}

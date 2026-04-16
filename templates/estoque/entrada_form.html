@@ -5,93 +5,276 @@
 {% block breadcrumb %}Entradas > Registrar Nova{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Registrar Entrada de Estoque</h2>
-        <p class="text-sm text-gray-500">Informe os dados da nota fiscal e os itens recebidos.</p>
-    </div>
-
-    <form method="post" class="space-y-8">
+<div class="window-panel" x-data="itemManager()" @keydown.escape.window="closeAllModals()">
+    <div class="window-title">Cadastro de Entradas</div>
+    <form method="post" class="p-2 flex flex-col xl:flex-row gap-3">
         {% csrf_token %}
-        
-        <!-- Dados da Entrada -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">📦 Dados da Nota/Mestre</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label>{{ entrada_form.fornecedor.label }}</label>
-                    {{ entrada_form.fornecedor }}
-                </div>
-                <div>
-                    <label>{{ entrada_form.numero_nota.label }}</label>
-                    {{ entrada_form.numero_nota }}
-                </div>
-                <div class="md:col-span-2">
-                    <label>{{ entrada_form.observacoes.label }}</label>
-                    {{ entrada_form.observacoes }}
+        <div class="flex-1 space-y-2">
+            <div class="section-box">
+                <div class="window-title -mx-3 -mt-3 mb-3">Dados da Entrada</div>
+                <div class="grid grid-cols-1 md:grid-cols-6 gap-2 text-[12px]">
+                    <div>
+                        <label>{{ entrada_form.numero_nota.label }}</label>
+                        {{ entrada_form.numero_nota }}
+                    </div>
+                    <div>
+                        <label>{{ entrada_form.data_entrada.label }}</label>
+                        {{ entrada_form.data_entrada }}
+                    </div>
+                    <div>
+                        <label>{{ entrada_form.numero_pedido.label }}</label>
+                        {{ entrada_form.numero_pedido }}
+                    </div>
+                    <div class="md:col-span-3">
+                        <label>{{ entrada_form.fornecedor.label }}</label>
+                        {{ entrada_form.fornecedor }}
+                    </div>
+                    <div class="md:col-span-2">
+                        <label>{{ entrada_form.unidade.label }}</label>
+                        {{ entrada_form.unidade }}
+                    </div>
+                    <div class="md:col-span-3">
+                        <label>{{ entrada_form.setor.label }}</label>
+                        {{ entrada_form.setor }}
+                    </div>
+                    <div>
+                        <label>&nbsp;</label>
+                        <button type="button" @click="openItensModal()" class="action-btn justify-center h-[31px]">Inserir Itens</button>
+                    </div>
+                    <div class="md:col-span-3">
+                        <label>{{ entrada_form.licitacao.label }}</label>
+                        {{ entrada_form.licitacao }}
+                    </div>
+                    <div class="md:col-span-2">
+                        <label>{{ entrada_form.lote.label }}</label>
+                        {{ entrada_form.lote }}
+                    </div>
+                    <div>
+                        <label>{{ entrada_form.compra_direta.label }}</label>
+                        {{ entrada_form.compra_direta }}
+                    </div>
+                    <div class="md:col-span-3">
+                        <label>{{ entrada_form.programa.label }}</label>
+                        {{ entrada_form.programa }}
+                    </div>
+                    <div class="md:col-span-2">
+                        <label>{{ entrada_form.numero_empenho.label }}</label>
+                        {{ entrada_form.numero_empenho }}
+                    </div>
+                    <div class="md:col-span-5">
+                        <label>{{ entrada_form.observacoes.label }}</label>
+                        {{ entrada_form.observacoes }}
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Itens da Entrada -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 overflow-hidden" x-data="itemManager()">
-            <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">📝 Itens da Entrada</h3>
-            
-            {{ formset.management_form }}
-            
-            <table class="min-w-full divide-y divide-gray-200" id="item-table">
-                <thead>
-                    <tr class="bg-gray-50">
-                        <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Produto</th>
-                        <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase w-32">Quantidade</th>
-                        <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase w-40">Preço Unit.</th>
-                        <th class="px-4 py-2 text-center text-xs font-bold text-gray-500 uppercase w-16">Remover</th>
+            <div class="window-panel overflow-x-auto bg-white">
+                {{ formset.management_form }}
+                <table class="min-w-full text-[11px]" id="item-table">
+                    <thead class="bg-[#dbe6f8] text-[#27486f]">
+                    <tr>
+                        <th class="px-2 py-1 border border-[#9bb1ce] text-left">Cód</th>
+                        <th class="px-2 py-1 border border-[#9bb1ce] text-left">Descrição</th>
+                        <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Quant.</th>
+                        <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Vlr Unit</th>
+                        <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Licit. Rest.</th>
+                        <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Total</th>
+                        <th class="px-2 py-1 border border-[#9bb1ce] text-center w-14">X</th>
                     </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
+                    </thead>
+                    <tbody>
                     {% for form in formset %}
-                    <tr class="item-form">
-                        <td class="px-2 py-3">
+                    <tr class="item-form hover:bg-[#eef4ff]">
+                        <td class="px-2 py-1 border border-[#c2d1e7]">{{ forloop.counter }}</td>
+                        <td class="px-2 py-1 border border-[#c2d1e7]">
                             {{ form.id }}
                             {{ form.produto }}
                             {% if form.produto.errors %}
                             <p class="text-[10px] text-red-600 font-medium">{{ form.produto.errors.0 }}</p>
                             {% endif %}
                         </td>
-                        <td class="px-2 py-3">
+                        <td class="px-2 py-1 border border-[#c2d1e7]">
                             {{ form.quantidade }}
                         </td>
-                        <td class="px-2 py-3">
+                        <td class="px-2 py-1 border border-[#c2d1e7]">
                             {{ form.preco_unitario }}
                         </td>
-                        <td class="px-2 py-3 text-center">
+                        <td class="px-2 py-1 border border-[#c2d1e7]">
+                            {{ form.licitacao_restante }}
+                        </td>
+                        <td class="px-2 py-1 border border-[#c2d1e7] text-right font-semibold">
+                            R$ <span x-text="calcRowTotal($el)">0,00</span>
+                        </td>
+                        <td class="px-2 py-1 border border-[#c2d1e7] text-center">
                             {{ form.DELETE }}
                         </td>
                     </tr>
                     {% endfor %}
-                </tbody>
-            </table>
-
-            <div class="mt-4 flex justify-between items-center">
-                <p class="text-xs text-gray-400">* Preencha todos os campos obrigatórios.</p>
-                <div class="flex space-x-3">
-                    <a href="{% url 'entrada_list' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancelar
-                    </a>
-                    <button type="submit" class="px-6 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
-                        Finalizar Entrada
-                    </button>
+                    </tbody>
+                </table>
+                <div class="p-2 text-right text-[12px] font-bold text-[#17355d] bg-[#dbe6f8] border-t border-[#9bb1ce]">
+                    Total geral: R$ <span x-text="calcGrandTotal()">0,00</span>
                 </div>
             </div>
         </div>
+
+        <div class="w-full xl:w-40 space-y-2">
+            <button type="submit" class="action-btn">💾 Salvar <span>F7</span></button>
+            <a href="{% url 'entrada_create' %}" class="action-btn">📄 Incluir <span>F2</span></a>
+            <button type="button" class="action-btn">✏ Alterar <span>F3</span></button>
+            <button type="button" class="action-btn">🗑 Excluir <span>F4</span></button>
+            <button type="button" @click="openConsultaModal()" class="action-btn">🔍 Consulta <span>F5</span></button>
+            <button type="button" class="action-btn" onclick="window.print()">🖨 Imprimir <span></span></button>
+            <a href="{% url 'entrada_list' %}" class="action-btn">🚪 Fechar <span>Esc</span></a>
+        </div>
     </form>
+
+    <div x-show="itensModalOpen" x-cloak class="erp-modal-overlay" @click.self="itensModalOpen = false">
+        <div class="erp-modal-window">
+            <div class="erp-modal-titlebar">
+                <span>Inserir Itens da Entrada</span>
+                <button type="button" class="action-btn w-auto px-2 py-0.5" @click="itensModalOpen = false">Fechar <span>Esc</span></button>
+            </div>
+            <div class="erp-modal-body space-y-3">
+                <div class="section-box">
+                    <div class="grid grid-cols-1 md:grid-cols-[1fr_120px_120px_auto] gap-2 items-end">
+                        <div>
+                            <label>Produto</label>
+                            <select>
+                                <option>Selecione o produto</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Quantidade</label>
+                            <input type="number" step="0.01" placeholder="0,00">
+                        </div>
+                        <div>
+                            <label>Valor Unitário</label>
+                            <input type="number" step="0.01" placeholder="0,00">
+                        </div>
+                        <button type="button" class="action-btn w-auto">Adicionar <span>Enter</span></button>
+                    </div>
+                </div>
+                <div class="window-panel bg-white overflow-x-auto">
+                    <table class="min-w-full text-[11px]">
+                        <thead class="bg-[#dbe6f8] text-[#27486f]">
+                            <tr>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Item</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Produto</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right">Quantidade</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" class="px-2 py-6 border border-[#c2d1e7] text-center text-[#54769d]">Preencha os campos para adicionar novos itens à entrada.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="consultaModalOpen" x-cloak class="erp-modal-overlay" @click.self="consultaModalOpen = false">
+        <div class="erp-modal-window max-w-5xl">
+            <div class="erp-modal-titlebar">
+                <span>Consulta de Entradas</span>
+                <button type="button" class="action-btn w-auto px-2 py-0.5" @click="consultaModalOpen = false">Fechar <span>Esc</span></button>
+            </div>
+            <div class="erp-modal-body space-y-3">
+                <div class="section-box">
+                    <div class="grid grid-cols-1 md:grid-cols-[180px_1fr_160px_auto] gap-2 items-end">
+                        <div>
+                            <label>Nota Fiscal</label>
+                            <input type="text" placeholder="Ex.: 2026-001">
+                        </div>
+                        <div>
+                            <label>Fornecedor</label>
+                            <input type="text" placeholder="Digite para filtrar">
+                        </div>
+                        <div>
+                            <label>Data</label>
+                            <input type="date">
+                        </div>
+                        <button type="button" class="action-btn w-auto">Filtrar <span>F5</span></button>
+                    </div>
+                </div>
+                <div class="window-panel bg-white overflow-x-auto">
+                    <table class="min-w-full text-[11px]">
+                        <thead class="bg-[#dbe6f8] text-[#27486f]">
+                            <tr>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Data</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Fornecedor</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Nota</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Itens</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" class="px-2 py-6 border border-[#c2d1e7] text-center text-[#54769d]">A consulta completa permanece disponível na tela de entradas.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-end">
+                    <a href="{% url 'entrada_list' %}" class="action-btn w-auto">Abrir tela completa <span>↗</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
     function itemManager() {
         return {
-            // Futuras melhorias dinâmicas com Alpine podem ser adicionadas aqui
+            itensModalOpen: false,
+            consultaModalOpen: false,
+            openItensModal() {
+                this.closeAllModals();
+                this.itensModalOpen = true;
+            },
+            openConsultaModal() {
+                this.closeAllModals();
+                this.consultaModalOpen = true;
+            },
+            closeAllModals() {
+                this.itensModalOpen = false;
+                this.consultaModalOpen = false;
+            },
+            numBySuffix(tr, suffix) {
+                const input = tr.querySelector(`input[name$="-${suffix}"]`);
+                return parseFloat((input?.value || "0").replace(',', '.')) || 0;
+            },
+            calcRowTotal(el) {
+                const tr = el.closest('tr');
+                const quantidade = this.numBySuffix(tr, 'quantidade');
+                const preco = this.numBySuffix(tr, 'preco_unitario');
+                return (quantidade * preco).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            },
+            calcGrandTotal() {
+                let total = 0;
+                document.querySelectorAll('tr.item-form').forEach(tr => {
+                    total += this.numBySuffix(tr, 'quantidade') * this.numBySuffix(tr, 'preco_unitario');
+                });
+                return total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            }
         };
     }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'F7') {
+            e.preventDefault();
+            const form = document.querySelector('form');
+            if (form) form.submit();
+        }
+        if (e.key === 'F5') {
+            e.preventDefault();
+            const root = document.querySelector('[x-data^="itemManager"]');
+            if (root && root.__x) {
+                root.__x.$data.openConsultaModal();
+            }
+        }
+    });
 </script>
 {% endblock %}

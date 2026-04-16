@@ -5,29 +5,28 @@
 {% block breadcrumb %}Pedidos > Cadastro de Pedidos{% endblock %}
 
 {% block content %}
-<div class="flex flex-col xl:flex-row gap-6">
-    <!-- Main Form Area -->
-    <div class="flex-1 space-y-6">
-        <form method="post" id="pedido-form" class="space-y-6">
+<div class="window-panel" x-data="itemCalculator()" @keydown.escape.window="closeAllModals()">
+    <div class="window-title">Cadastro de Pedidos</div>
+    <div class="p-2">
+        <div class="flex flex-col xl:flex-row gap-3">
+            <div class="flex-1">
+                <form method="post" id="pedido-form" class="space-y-2">
             {% csrf_token %}
             
-            <!-- Dados do Pedido (Cabeçalho ERP) -->
-            <div class="bg-white rounded border border-gray-200 shadow-sm">
-                <div class="px-4 py-2 bg-blue-50 border-b border-gray-200 font-bold text-blue-900 text-xs uppercase tracking-wider">
-                    📦 Dados do Pedido
-                </div>
-                <div class="p-4 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    <div class="md:col-span-1">
+            <div class="section-box">
+                <div class="window-title -mx-3 -mt-3 mb-3">Dados do Pedido</div>
+                <div class="grid grid-cols-1 md:grid-cols-6 gap-2">
+                    <div>
                         <label>Código</label>
-                        <input type="text" value="{{ pedido.id|default:'NOVO' }}" disabled class="bg-gray-100 font-bold">
+                        <input type="text" value="{{ pedido.id|default:'NOVO' }}" disabled class="bg-white/90 font-bold">
                     </div>
-                    <div class="md:col-span-1">
-                        <label>Data/Hora</label>
-                        <input type="text" value="{% if pedido.data_pedido %}{{ pedido.data_pedido|date:'d/m/Y H:i' }}{% else %}{% now 'd/m/Y H:i' %}{% endif %}" disabled class="bg-gray-100">
+                    <div>
+                        <label>Data</label>
+                        <input type="text" value="{% if pedido.data_pedido %}{{ pedido.data_pedido|date:'d/m/Y' }}{% else %}{% now 'd/m/Y' %}{% endif %}" disabled class="bg-white/90">
                     </div>
-                    <div class="md:col-span-1">
-                        <label>Pendente?</label>
-                        <select disabled class="bg-gray-100">
+                    <div>
+                        <label>Pendente</label>
+                        <select disabled class="bg-white/90">
                             <option>{% if pedido.status == 'ENTREGUE' %}N{% else %}S{% endif %}</option>
                         </select>
                     </div>
@@ -36,24 +35,24 @@
                         {{ pedido_form.endereco_entrega }}
                     </div>
 
-                    <div class="md:col-span-3 lg:col-span-4">
+                    <div class="md:col-span-3">
                         <label>{{ pedido_form.programa.label }}</label>
                         {{ pedido_form.programa }}
                     </div>
-                    <div class="md:col-span-3 lg:col-span-2">
+                    <div class="md:col-span-3">
                         <label>{{ pedido_form.observacoes.label }}</label>
                         {{ pedido_form.observacoes }}
                     </div>
 
-                    <div class="md:col-span-3 lg:col-span-3">
+                    <div class="md:col-span-2">
                         <label>{{ pedido_form.fornecedor.label }}</label>
                         {{ pedido_form.fornecedor }}
                     </div>
-                    <div class="md:col-span-3 lg:col-span-2">
+                    <div class="md:col-span-3">
                         <label>{{ pedido_form.licitacao.label }}</label>
                         {{ pedido_form.licitacao }}
                     </div>
-                    <div class="md:col-span-1">
+                    <div>
                         <label>{{ pedido_form.numero_empenho.label }}</label>
                         {{ pedido_form.numero_empenho }}
                     </div>
@@ -66,159 +65,299 @@
                         <label>{{ pedido_form.setor.label }}</label>
                         {{ pedido_form.setor }}
                     </div>
-                    <div class="md:col-span-1 flex items-end pb-2">
-                        <label class="inline-flex items-center cursor-pointer">
-                            {{ pedido_form.compra_direta }}
-                            <span class="ml-2 text-[10px] font-bold text-gray-700 uppercase">Compra Direta</span>
-                        </label>
+                    <div>
+                        <label>Compra Direta</label>
+                        {{ pedido_form.compra_direta }}
                     </div>
-                    <div class="md:col-span-1 flex items-end">
-                        <button type="button" class="w-full bg-blue-100 text-blue-700 border border-blue-200 rounded px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-blue-200">
-                            Inserir Itens
-                        </button>
+                    <div>
+                        <label>&nbsp;</label>
+                        <button type="button" @click="openItensModal()" class="action-btn justify-center h-[31px]">Inserir Itens</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Grid de Itens (ERP Table Style) -->
-            <div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden" x-data="itemCalculator()">
-                <div class="overflow-x-auto">
+            <div class="window-panel">
+                <div class="overflow-x-auto bg-white">
                     {{ formset.management_form }}
-                    <table class="min-w-full divide-y divide-gray-200 text-[11px]">
-                        <thead class="bg-gray-50 font-bold text-gray-500 uppercase">
+                    <table class="min-w-full text-[11px]">
+                        <thead class="bg-[#dbe6f8] font-bold text-[#27486f] uppercase">
                             <tr>
-                                <th class="px-3 py-2 text-left w-12 border-r">Pos</th>
-                                <th class="px-3 py-2 text-left border-r">Cód. / Descrição</th>
-                                <th class="px-3 py-2 text-left w-16 border-r">Unid</th>
-                                <th class="px-3 py-2 text-right w-24 border-r">Qt. Pedida</th>
-                                <th class="px-3 py-2 text-right w-24 border-r">Qt. Atend.</th>
-                                <th class="px-3 py-2 text-right w-24 border-r">Preço</th>
-                                <th class="px-3 py-2 text-right w-24 border-r">Total</th>
-                                <th class="px-3 py-2 text-center w-12">❌</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left w-10">Cód</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Descrição</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-center w-16">Unidade</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Qt Pedida</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Qt Atendida</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Preço</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Qt Licitada</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Restante</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Total Pedido</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right w-24">Total Atend.</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right w-16">% Licit.</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-center w-10">X</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 bg-white">
+                        <tbody>
                             {% for form in formset %}
-                            <tr class="hover:bg-blue-50/30">
-                                <td class="px-3 py-2 border-r text-center text-gray-400 font-mono">{{ forloop.counter }}</td>
-                                <td class="px-2 py-1 border-r">
+                            <tr class="hover:bg-[#eef4ff] item-row">
+                                <td class="px-2 py-1 border border-[#c2d1e7] text-center">{{ forloop.counter }}</td>
+                                <td class="px-2 py-1 border border-[#c2d1e7]">
                                     {{ form.id }}
                                     {{ form.produto }}
                                 </td>
-                                <td class="px-3 py-2 border-r text-center font-bold text-gray-500">
-                                    <span x-text="getItemUnid($el)">-</span>
+                                <td class="px-2 py-1 border border-[#c2d1e7] text-center">
+                                    <span x-text="getItemUnid($el)">UN</span>
                                 </td>
-                                <td class="px-2 py-1 border-r">
+                                <td class="px-2 py-1 border border-[#c2d1e7]">
                                     {{ form.quantidade }}
                                 </td>
-                                <td class="px-2 py-1 border-r">
+                                <td class="px-2 py-1 border border-[#c2d1e7]">
                                     {{ form.quantidade_atendida }}
                                 </td>
-                                <td class="px-2 py-1 border-r">
+                                <td class="px-2 py-1 border border-[#c2d1e7]">
                                     {{ form.preco_unitario }}
                                 </td>
-                                <td class="px-3 py-2 border-r text-right font-bold text-gray-700">
+                                <td class="px-2 py-1 border border-[#c2d1e7]">
+                                    {{ form.quantidade_licitada }}
+                                </td>
+                                <td class="px-2 py-1 border border-[#c2d1e7] text-right font-semibold text-[#0d3892]">
+                                    <span x-text="calcRestante($el)">0,00</span>
+                                </td>
+                                <td class="px-2 py-1 border border-[#c2d1e7] text-right font-semibold">
                                     R$ <span x-text="calcRowTotal($el)">0,00</span>
                                 </td>
-                                <td class="px-2 py-1 text-center">
+                                <td class="px-2 py-1 border border-[#c2d1e7] text-right font-semibold">
+                                    R$ <span x-text="calcRowAtendido($el)">0,00</span>
+                                </td>
+                                <td class="px-2 py-1 border border-[#c2d1e7] text-right font-semibold">
+                                    <span x-text="calcPercentual($el)">0,00</span>
+                                </td>
+                                <td class="px-2 py-1 border border-[#c2d1e7] text-center">
                                     {{ form.DELETE }}
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
-                        <tfoot class="bg-gray-50 font-bold border-t-2 border-gray-200">
+                        <tfoot class="bg-[#dbe6f8] font-bold">
                             <tr>
-                                <td colspan="6" class="px-6 py-3 text-right text-gray-500 uppercase tracking-wider">Total Geral do Pedido:</td>
-                                <td class="px-6 py-3 text-right text-lg text-blue-900">
+                                <td colspan="8" class="px-2 py-2 border border-[#9bb1ce] text-right">Total Geral</td>
+                                <td class="px-2 py-2 border border-[#9bb1ce] text-right text-[#17355d]">
                                     R$ <span x-text="calcGrandTotal()">0,00</span>
                                 </td>
-                                <td></td>
+                                <td class="px-2 py-2 border border-[#9bb1ce] text-right text-[#17355d]">R$ <span x-text="calcGrandAtendido()">0,00</span></td>
+                                <td class="px-2 py-2 border border-[#9bb1ce]"></td>
+                                <td class="px-2 py-2 border border-[#9bb1ce]"></td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
             </div>
-        </form>
+                </form>
+            </div>
+
+            <div class="w-full xl:w-40 space-y-2">
+                <button type="submit" form="pedido-form" class="action-btn">💾 Salvar <span>F7</span></button>
+                <a href="{% url 'pedido_create' %}" class="action-btn">📄 Incluir <span>F2</span></a>
+                <button type="button" class="action-btn">✏ Alterar <span>F3</span></button>
+                <button type="button" class="action-btn">🗑 Excluir <span>F4</span></button>
+                <button type="button" @click="openConsultaModal()" class="action-btn">🔍 Consulta <span>F5</span></button>
+                <button type="button" class="action-btn">⛔ Cancelar <span>F6</span></button>
+                <button type="button" onclick="window.print()" class="action-btn">🖨 Imprimir <span></span></button>
+                <a href="{% url 'pedido_list' %}" class="action-btn">🚪 Fechar <span>Esc</span></a>
+            </div>
+        </div>
     </div>
 
-    <!-- Action Sidebar (Right Side) -->
-    <div class="w-full xl:w-40 space-y-3">
-        <button type="submit" form="pedido-form" class="btn-erp text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-600 hover:text-white group">
-            <span>💾</span>
-            <span>Salvar</span>
-            <span>[F7]</span>
-        </button>
-        <a href="{% url 'pedido_create' %}" class="btn-erp text-green-600 border-green-200 bg-green-50 hover:bg-green-600 hover:text-white">
-            <span>📄</span>
-            <span>Incluir</span>
-            <span>[F2]</span>
-        </a>
-        <button type="button" class="btn-erp">
-            <span>✏️</span>
-            <span>Alterar</span>
-            <span>[F3]</span>
-        </button>
-        <button type="button" class="btn-erp text-red-600 border-red-200 bg-red-50 hover:bg-red-600 hover:text-white">
-            <span>🗑️</span>
-            <span>Excluir</span>
-            <span>[F4]</span>
-        </button>
-        <a href="{% url 'pedido_list' %}" class="btn-erp">
-            <span>🔍</span>
-            <span>Consulta</span>
-            <span>[F5]</span>
-        </a>
-        <button type="button" class="btn-erp">
-            <span>🚫</span>
-            <span>Cancelar</span>
-            <span>[F6]</span>
-        </button>
-        <button type="button" onclick="window.print()" class="btn-erp">
-            <span>🖨️</span>
-            <span>Imprimir</span>
-            <span>-</span>
-        </button>
-        <a href="{% url 'pedido_list' %}" class="btn-erp">
-            <span>🚪</span>
-            <span>Fechar</span>
-            <span>[Esc]</span>
-        </a>
+    <div x-show="itensModalOpen" x-cloak class="erp-modal-overlay" @click.self="itensModalOpen = false">
+        <div class="erp-modal-window">
+            <div class="erp-modal-titlebar">
+                <span>Inserir Itens do Pedido</span>
+                <button type="button" class="action-btn w-auto px-2 py-0.5" @click="itensModalOpen = false">Fechar <span>Esc</span></button>
+            </div>
+            <div class="erp-modal-body space-y-3">
+                <div class="section-box">
+                    <div class="grid grid-cols-1 md:grid-cols-[1fr_120px_120px_auto] gap-2 items-end">
+                        <div>
+                            <label>Produto</label>
+                            <select>
+                                <option>Selecione o produto</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Quantidade</label>
+                            <input type="number" step="0.01" placeholder="0,00">
+                        </div>
+                        <div>
+                            <label>Preço Unit.</label>
+                            <input type="number" step="0.01" placeholder="0,00">
+                        </div>
+                        <button type="button" class="action-btn w-auto">Adicionar <span>Enter</span></button>
+                    </div>
+                </div>
+                <div class="window-panel bg-white overflow-x-auto">
+                    <table class="min-w-full text-[11px]">
+                        <thead class="bg-[#dbe6f8] text-[#27486f]">
+                            <tr>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Item</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Descrição</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right">Qtd</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right">Preço</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="px-2 py-6 border border-[#c2d1e7] text-center text-[#54769d]">Use os campos acima para inserir novos itens no pedido.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="consultaModalOpen" x-cloak class="erp-modal-overlay" @click.self="consultaModalOpen = false">
+        <div class="erp-modal-window max-w-5xl">
+            <div class="erp-modal-titlebar">
+                <span>Consulta de Pedidos</span>
+                <button type="button" class="action-btn w-auto px-2 py-0.5" @click="consultaModalOpen = false">Fechar <span>Esc</span></button>
+            </div>
+            <div class="erp-modal-body space-y-3">
+                <div class="section-box">
+                    <div class="grid grid-cols-1 md:grid-cols-[180px_1fr_180px_auto] gap-2 items-end">
+                        <div>
+                            <label>Código</label>
+                            <input type="text" placeholder="Ex.: 1234">
+                        </div>
+                        <div>
+                            <label>Secretaria / Unidade</label>
+                            <input type="text" placeholder="Digite para filtrar">
+                        </div>
+                        <div>
+                            <label>Status</label>
+                            <select>
+                                <option>Todos</option>
+                                <option>Solicitado</option>
+                                <option>Reservado</option>
+                                <option>Empenhado</option>
+                                <option>Entregue</option>
+                            </select>
+                        </div>
+                        <button type="button" class="action-btn w-auto">Filtrar <span>F5</span></button>
+                    </div>
+                </div>
+                <div class="window-panel bg-white overflow-x-auto">
+                    <table class="min-w-full text-[11px]">
+                        <thead class="bg-[#dbe6f8] text-[#27486f]">
+                            <tr>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Código</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Unidade</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Data</th>
+                                <th class="px-2 py-1 border border-[#9bb1ce] text-left">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" class="px-2 py-6 border border-[#c2d1e7] text-center text-[#54769d]">A consulta completa permanece disponível na listagem de pedidos.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-end">
+                    <a href="{% url 'pedido_list' %}" class="action-btn w-auto">Abrir tela completa <span>↗</span></a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
     function itemCalculator() {
         return {
+            itensModalOpen: false,
+            consultaModalOpen: false,
+            openItensModal() {
+                this.closeAllModals();
+                this.itensModalOpen = true;
+            },
+            openConsultaModal() {
+                this.closeAllModals();
+                this.consultaModalOpen = true;
+            },
+            closeAllModals() {
+                this.itensModalOpen = false;
+                this.consultaModalOpen = false;
+            },
+            numBySuffix(tr, suffix) {
+                const input = tr.querySelector(`input[name$="-${suffix}"]`);
+                return parseFloat((input?.value || "0").replace(',', '.')) || 0;
+            },
             calcRowTotal(el) {
                 const tr = el.closest('tr');
-                const qt = parseFloat(tr.querySelector('input[name$="-quantidade"]').value) || 0;
-                const preco = parseFloat(tr.querySelector('input[name$="-preco_unitario"]').value) || 0;
+                const qt = this.numBySuffix(tr, 'quantidade');
+                const preco = this.numBySuffix(tr, 'preco_unitario');
                 return (qt * preco).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            },
+            calcRowAtendido(el) {
+                const tr = el.closest('tr');
+                const qt = this.numBySuffix(tr, 'quantidade_atendida');
+                const preco = this.numBySuffix(tr, 'preco_unitario');
+                return (qt * preco).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            },
+            calcRestante(el) {
+                const tr = el.closest('tr');
+                const lic = this.numBySuffix(tr, 'quantidade_licitada');
+                const atend = this.numBySuffix(tr, 'quantidade_atendida');
+                return (lic - atend).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            },
+            calcPercentual(el) {
+                const tr = el.closest('tr');
+                const lic = this.numBySuffix(tr, 'quantidade_licitada');
+                const atend = this.numBySuffix(tr, 'quantidade_atendida');
+                if (!lic) return '0,00';
+                return ((atend / lic) * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             },
             calcGrandTotal() {
                 let total = 0;
-                document.querySelectorAll('tr.hover\\:bg-blue-50\\/30').forEach(tr => {
-                    const qt = parseFloat(tr.querySelector('input[name$="-quantidade"]').value) || 0;
-                    const preco = parseFloat(tr.querySelector('input[name$="-preco_unitario"]').value) || 0;
+                document.querySelectorAll('tr.item-row').forEach(tr => {
+                    const qt = this.numBySuffix(tr, 'quantidade');
+                    const preco = this.numBySuffix(tr, 'preco_unitario');
+                    total += (qt * preco);
+                });
+                return total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            },
+            calcGrandAtendido() {
+                let total = 0;
+                document.querySelectorAll('tr.item-row').forEach(tr => {
+                    const qt = this.numBySuffix(tr, 'quantidade_atendida');
+                    const preco = this.numBySuffix(tr, 'preco_unitario');
                     total += (qt * preco);
                 });
                 return total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             },
             getItemUnid(el) {
-                // Mock logic for unit, in a real app this might come from data-attributes or API
-                return "UNID";
+                return "UN";
             }
         };
     }
 
-    // Keyboard shortcuts mock
     window.addEventListener('keydown', (e) => {
         if (e.key === 'F7') {
             e.preventDefault();
             document.getElementById('pedido-form').submit();
         }
         if (e.key === 'Escape') {
-            window.location.href = "{% url 'pedido_list' %}";
+            const root = document.querySelector('[x-data^="itemCalculator"]');
+            const hasModalOpen = root && root.__x && (root.__x.$data.itensModalOpen || root.__x.$data.consultaModalOpen);
+            if (!hasModalOpen) {
+                window.location.href = "{% url 'pedido_list' %}";
+            }
+        }
+        if (e.key === 'F5') {
+            e.preventDefault();
+            const root = document.querySelector('[x-data^="itemCalculator"]');
+            if (root && root.__x) {
+                root.__x.$data.openConsultaModal();
+            }
         }
     });
 </script>

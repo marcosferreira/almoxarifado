@@ -5,45 +5,113 @@
 {% block breadcrumb %}Fornecedores{% endblock %}
 
 {% block content %}
-<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-    <div>
-        <h2 class="text-2xl font-bold text-gray-800">Fornecedores Parceiros</h2>
-        <p class="text-sm text-gray-500">Gestão de empresas que fornecem materiais para a prefeitura.</p>
+<div class="window-panel" x-data="fornecedorListUi()" @keydown.escape.window="closeModal()">
+    <div class="window-title">Cadastro de Fornecedores</div>
+    <div class="p-2 flex flex-col xl:flex-row gap-3">
+        <div class="flex-1 space-y-2">
+            <form class="section-box grid grid-cols-1 md:grid-cols-[1fr_220px_auto] gap-2 items-end" onsubmit="event.preventDefault();">
+                <div>
+                    <label>Fornecedor / Razão Social</label>
+                    <input type="text" placeholder="Digite para filtrar">
+                </div>
+                <div>
+                    <label>CNPJ</label>
+                    <input type="text" placeholder="00.000.000/0000-00">
+                </div>
+                <button type="button" class="action-btn w-auto">Filtrar <span>Enter</span></button>
+            </form>
+
+            <div class="window-panel overflow-x-auto bg-white">
+                <table class="min-w-full text-[11px]">
+                    <thead class="bg-[#dbe6f8] text-[#27486f] uppercase">
+                        <tr>
+                            <th class="px-2 py-1 text-left border border-[#9bb1ce] w-12">Cód</th>
+                            <th class="px-2 py-1 text-left border border-[#9bb1ce]">Fornecedor</th>
+                            <th class="px-2 py-1 text-left border border-[#9bb1ce]">Razão Social</th>
+                            <th class="px-2 py-1 text-left border border-[#9bb1ce] w-40">CNPJ</th>
+                            <th class="px-2 py-1 text-left border border-[#9bb1ce] w-36">Contato</th>
+                            <th class="px-2 py-1 text-left border border-[#9bb1ce] w-28">Telefone</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fornecedor in fornecedores %}
+                        <tr class="hover:bg-[#eef4ff]">
+                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ forloop.counter }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7] font-semibold text-[#1d426f]">{{ fornecedor.nome_fantasia|upper }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7] text-[#5a7da4]">{{ fornecedor.razao_social|default:"-" }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ fornecedor.cnpj }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ fornecedor.contato|default:"-" }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ fornecedor.telefone|default:"-" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-3 py-8 text-center border border-[#c2d1e7] text-[#5f7fa6]">Nenhum fornecedor cadastrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="w-full xl:w-40 space-y-2">
+            <a href="{% url 'fornecedor_create' %}" class="action-btn">📄 Incluir <span>F2</span></a>
+            <button type="button" class="action-btn" @click="openModal()">🔍 Consulta <span>F5</span></button>
+            <button type="button" class="action-btn" onclick="window.print()">🖨 Imprimir <span>F8</span></button>
+            <a href="{% url 'dashboard' %}" class="action-btn">🚪 Fechar <span>Esc</span></a>
+        </div>
     </div>
-    <div class="flex items-center space-x-3">
-        <a href="{% url 'fornecedor_create' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium flex items-center space-x-2">
-            <span>➕</span><span>Novo Fornecedor</span>
-        </a>
+
+    <div x-show="consultaModalOpen" x-cloak class="erp-modal-overlay" @click.self="closeModal()">
+        <div class="erp-modal-window max-w-5xl">
+            <div class="erp-modal-titlebar">
+                <span>Consulta de Fornecedores</span>
+                <button type="button" class="action-btn w-auto px-2 py-0.5" @click="closeModal()">Fechar <span>Esc</span></button>
+            </div>
+            <div class="erp-modal-body space-y-3">
+                <div class="section-box">
+                    <div class="grid grid-cols-1 md:grid-cols-[1fr_220px_auto] gap-2 items-end">
+                        <div>
+                            <label>Fornecedor</label>
+                            <input type="text" placeholder="Nome fantasia ou razão social">
+                        </div>
+                        <div>
+                            <label>CNPJ</label>
+                            <input type="text" placeholder="00.000.000/0000-00">
+                        </div>
+                        <button type="button" class="action-btn w-auto">Filtrar <span>F5</span></button>
+                    </div>
+                </div>
+                <div class="window-panel bg-white p-3 text-[#58789f]">A listagem principal já está no padrão de consulta completa.</div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {% for fornecedor in fornecedores %}
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:border-blue-300 transition group">
-        <div class="flex items-start justify-between mb-4">
-            <div class="bg-blue-50 p-3 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
-                🏢
-            </div>
-            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">CNPJ: {{ fornecedor.cnpj }}</span>
-        </div>
-        <h3 class="text-lg font-bold text-gray-800 truncate">{{ fornecedor.nome_fantasia }}</h3>
-        <p class="text-sm text-gray-500 truncate mb-4">{{ fornecedor.razao_social }}</p>
-        
-        <div class="space-y-2 border-t pt-4">
-            <div class="flex items-center text-xs text-gray-600">
-                <span class="w-6">👤</span>
-                <span class="truncate">{{ fornecedor.contato|default:"Não informado" }}</span>
-            </div>
-            <div class="flex items-center text-xs text-gray-600">
-                <span class="w-6">📞</span>
-                <span>{{ fornecedor.telefone|default:"Não informado" }}</span>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <div class="col-span-full py-12 text-center bg-white rounded-xl border-2 border-dashed border-gray-200 text-gray-400">
-        Nenhum fornecedor cadastrado.
-    </div>
-    {% endfor %}
-</div>
+<script>
+    function fornecedorListUi() {
+        return {
+            consultaModalOpen: false,
+            openModal() {
+                this.consultaModalOpen = true;
+            },
+            closeModal() {
+                this.consultaModalOpen = false;
+            }
+        }
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'F2') {
+            e.preventDefault();
+            window.location.href = "{% url 'fornecedor_create' %}";
+        }
+        if (e.key === 'F5') {
+            e.preventDefault();
+            const root = document.querySelector('[x-data^="fornecedorListUi"]');
+            if (root && root.__x) {
+                root.__x.$data.openModal();
+            }
+        }
+    });
+</script>
 {% endblock %}

@@ -5,61 +5,79 @@
 {% block breadcrumb %}Relatórios e Inventário{% endblock %}
 
 {% block content %}
-<div class="mb-8">
-    <h2 class="text-2xl font-bold text-gray-800">Relatórios do Sistema</h2>
-    <p class="text-sm text-gray-500">Acompanhe o consumo por secretaria e o inventário atual.</p>
-</div>
-
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Inventário -->
-    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-gray-50">
-            <h3 class="font-bold text-gray-700">📋 Inventário Atualizado</h3>
-            <button onclick="window.print()" class="text-xs bg-white border border-gray-200 px-3 py-1 rounded shadow-sm hover:bg-gray-50">🖨️ Imprimir</button>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50/50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase">Material</th>
-                        <th class="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase">Categoria</th>
-                        <th class="px-6 py-3 text-right text-[10px] font-bold text-gray-400 uppercase">Estoque Físico</th>
-                        <th class="px-6 py-3 text-right text-[10px] font-bold text-gray-400 uppercase">Disponível</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    {% for produto in produtos %}
-                    <tr>
-                        <td class="px-6 py-4 text-sm font-bold text-gray-900">{{ produto.nome }}</td>
-                        <td class="px-6 py-4 text-xs text-gray-500">{{ produto.categoria.nome }}</td>
-                        <td class="px-6 py-4 text-right text-sm font-bold text-gray-700">{{ produto.estoque_atual }}</td>
-                        <td class="px-6 py-4 text-right text-sm font-bold text-blue-600">{{ produto.estoque_disponivel }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Consumo por Secretaria -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-fit">
-        <div class="px-6 py-4 border-b border-gray-50 bg-gray-50">
-            <h3 class="font-bold text-gray-700">🏛️ Consumo por Secretaria</h3>
-        </div>
-        <div class="p-6 space-y-6">
-            {% for item in consumo_secretaria %}
-            <div>
-                <div class="flex justify-between text-sm mb-1">
-                    <span class="font-bold text-gray-700">{{ item.pedido__secretaria }}</span>
-                    <span class="text-blue-600 font-bold">{{ item.total_itens }} un.</span>
-                </div>
-                <div class="w-full bg-gray-100 rounded-full h-2">
-                    <div class="bg-blue-600 h-2 rounded-full" style="width: 70%"></div>
+<div class="window-panel">
+    <div class="window-title">Relatório de Entradas por Grupo</div>
+    <div class="p-2 grid grid-cols-1 xl:grid-cols-[1fr_120px] gap-3">
+        <div class="space-y-2">
+            <div class="section-box text-[12px]">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                    <div>
+                        <label>Período</label>
+                        <select><option>Todas</option></select>
+                    </div>
+                    <div>
+                        <label>Grupo</label>
+                        <select><option>Todos</option></select>
+                    </div>
+                    <div>
+                        <label>Unidade</label>
+                        <select><option>Todos</option></select>
+                    </div>
+                    <div class="flex items-end">
+                        <label class="inline-flex items-center gap-2 text-[12px] normal-case">
+                            <input type="checkbox"> Compra Direta
+                        </label>
+                    </div>
                 </div>
             </div>
-            {% empty %}
-            <p class="text-center text-sm text-gray-400">Nenhum consumo registrado.</p>
-            {% endfor %}
+
+            <div class="window-panel overflow-x-auto bg-white">
+                <table class="min-w-full text-[12px]">
+                    <thead class="bg-[#dbe6f8] text-[#27486f]">
+                        <tr>
+                            <th class="px-2 py-1 border border-[#9bb1ce] text-left">Categoria</th>
+                            <th class="px-2 py-1 border border-[#9bb1ce] text-right">Entradas (Qtd)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for grupo in entradas_por_grupo %}
+                        <tr>
+                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ grupo.produto__categoria__nome|default:"Sem categoria" }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">{{ grupo.total_quantidade }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="px-2 py-4 border border-[#c2d1e7] text-center">Sem dados para o período.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="window-panel overflow-x-auto bg-white">
+                <div class="window-title">Consumo por Secretaria</div>
+                <table class="min-w-full text-[12px]">
+                    <thead class="bg-[#dbe6f8] text-[#27486f]">
+                        <tr>
+                            <th class="px-2 py-1 border border-[#9bb1ce] text-left">Secretaria</th>
+                            <th class="px-2 py-1 border border-[#9bb1ce] text-right">Total Itens</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in consumo_secretaria %}
+                        <tr>
+                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ item.pedido__secretaria }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">{{ item.total_itens }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="px-2 py-4 border border-[#c2d1e7] text-center">Nenhum consumo registrado.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <button onclick="window.print()" class="action-btn">Imprimir <span>F8</span></button>
+            <a href="{% url 'dashboard' %}" class="action-btn">Fechar <span>Esc</span></a>
         </div>
     </div>
 </div>

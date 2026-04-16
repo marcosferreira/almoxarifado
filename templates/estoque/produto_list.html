@@ -5,67 +5,125 @@
 {% block breadcrumb %}Produtos{% endblock %}
 
 {% block content %}
-<div class="mb-4 flex items-center justify-between">
-    <div class="flex items-center space-x-2">
-        <span class="text-blue-600">📦</span>
-        <h2 class="text-sm font-black text-gray-700 uppercase tracking-tighter">Catálogo de Produtos / Estoque</h2>
+<div class="window-panel" x-data="produtoListUi()" @keydown.escape.window="closeModal()">
+    <div class="window-title">Cadastro de Produtos</div>
+    <div class="p-2 flex flex-col xl:flex-row gap-3">
+        <div class="flex-1 space-y-2">
+            <form method="get" class="section-box grid grid-cols-1 md:grid-cols-[1fr_200px_auto] gap-2 items-end">
+                <div>
+                    <label>Descrição / Código de Barras</label>
+                    <input type="text" name="search" value="{{ search }}" placeholder="Digite para filtrar produtos">
+                </div>
+                <div>
+                    <label>Categoria</label>
+                    <select>
+                        <option>Todas</option>
+                    </select>
+                </div>
+                <button type="submit" class="action-btn w-auto">Filtrar <span>Enter</span></button>
+            </form>
+
+            <div class="window-panel overflow-x-auto bg-white">
+                <table class="min-w-full text-[11px]">
+                    <thead class="bg-[#dbe6f8] text-[#27486f] uppercase">
+                        <tr>
+                            <th class="px-2 py-1 text-left border border-[#9bb1ce] w-12">Cód</th>
+                            <th class="px-2 py-1 text-left border border-[#9bb1ce]">Descrição do Material</th>
+                            <th class="px-2 py-1 text-left border border-[#9bb1ce] w-32">Categoria</th>
+                            <th class="px-2 py-1 text-center border border-[#9bb1ce] w-16">Unid</th>
+                            <th class="px-2 py-1 text-right border border-[#9bb1ce] w-24">Físico</th>
+                            <th class="px-2 py-1 text-right border border-[#9bb1ce] w-24">Reserva</th>
+                            <th class="px-2 py-1 text-right border border-[#9bb1ce] w-24">Saldo Disp.</th>
+                            <th class="px-2 py-1 text-right border border-[#9bb1ce] w-20">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produto in produtos %}
+                        <tr class="hover:bg-[#eef4ff] transition">
+                            <td class="px-2 py-1 border border-[#c2d1e7]">{{ forloop.counter }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7] font-semibold text-[#1d426f]">{{ produto.nome|upper }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7] text-[#56779f]">{{ produto.categoria.nome|upper }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7] text-center">{{ produto.unidade_medida }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7] text-right {% if produto.estoque_atual < produto.estoque_minimo %}text-red-700 font-bold{% endif %}">{{ produto.estoque_atual }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7] text-right text-amber-700">{{ produto.estoque_reservado }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7] text-right text-[#0d3892] font-bold">{{ produto.estoque_disponivel }}</td>
+                            <td class="px-2 py-1 border border-[#c2d1e7] text-right">
+                                <a href="{% url 'produto_update' produto.pk %}" class="text-[#1d4a7d] font-bold hover:underline">Editar</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="px-3 py-8 text-center border border-[#c2d1e7] text-[#5f7fa6]">Nenhum produto encontrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="w-full xl:w-40 space-y-2">
+            <a href="{% url 'produto_create' %}" class="action-btn">📄 Incluir <span>F2</span></a>
+            <button type="button" class="action-btn" @click="openModal()">🔍 Consulta <span>F5</span></button>
+            <button type="button" class="action-btn" onclick="window.print()">🖨 Imprimir <span>F8</span></button>
+            <a href="{% url 'dashboard' %}" class="action-btn">🚪 Fechar <span>Esc</span></a>
+        </div>
     </div>
-    <div class="flex items-center space-x-3">
-        <form method="get" class="relative">
-            <input type="text" name="search" value="{{ search }}" placeholder="Filtro..." 
-                   class="pl-8 pr-2 py-1 border border-gray-300 rounded text-[10px] w-48">
-            <span class="absolute left-2 top-1.5 text-gray-400 text-[10px]">🔍</span>
-        </form>
-        <a href="{% url 'produto_create' %}" class="bg-blue-600 text-white px-3 py-1 rounded text-[10px] font-bold uppercase hover:bg-blue-700 transition">
-            Novo Produto [F2]
-        </a>
+
+    <div x-show="consultaModalOpen" x-cloak class="erp-modal-overlay" @click.self="closeModal()">
+        <div class="erp-modal-window max-w-5xl">
+            <div class="erp-modal-titlebar">
+                <span>Consulta de Produtos</span>
+                <button type="button" class="action-btn w-auto px-2 py-0.5" @click="closeModal()">Fechar <span>Esc</span></button>
+            </div>
+            <div class="erp-modal-body space-y-3">
+                <div class="section-box">
+                    <div class="grid grid-cols-1 md:grid-cols-[1fr_200px_auto] gap-2 items-end">
+                        <div>
+                            <label>Produto</label>
+                            <input type="text" placeholder="Descrição do produto">
+                        </div>
+                        <div>
+                            <label>Estoque</label>
+                            <select>
+                                <option>Todos</option>
+                                <option>Crítico</option>
+                                <option>Com saldo</option>
+                            </select>
+                        </div>
+                        <button type="button" class="action-btn w-auto">Filtrar <span>F5</span></button>
+                    </div>
+                </div>
+                <div class="window-panel bg-white p-3 text-[#58789f]">A listagem principal já está no padrão de consulta completa.</div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
-    <table class="min-w-full divide-y divide-gray-200 text-[11px]">
-        <thead class="bg-gray-50 font-bold text-gray-500 uppercase tracking-tighter">
-            <tr>
-                <th class="px-3 py-2 text-left border-r">Descrição do Material</th>
-                <th class="px-3 py-2 text-left border-r w-32">Categoria</th>
-                <th class="px-3 py-2 text-center border-r w-16">Unid</th>
-                <th class="px-3 py-2 text-right border-r w-24">Físico</th>
-                <th class="px-3 py-2 text-right border-r w-24">Reserva</th>
-                <th class="px-3 py-2 text-right border-r w-24">Saldo Disp.</th>
-                <th class="px-3 py-2 text-right w-20">Ações</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-            {% for produto in produtos %}
-            <tr class="hover:bg-blue-50 transition">
-                <td class="px-3 py-2 border-r font-bold text-gray-800">
-                    {{ produto.nome|upper }}
-                </td>
-                <td class="px-3 py-2 border-r text-gray-500 font-medium">
-                    {{ produto.categoria.nome|upper }}
-                </td>
-                <td class="px-3 py-2 border-r text-center font-black text-gray-400">
-                    {{ produto.unidade_medida }}
-                </td>
-                <td class="px-3 py-2 border-r text-right font-bold {% if produto.estoque_atual < produto.estoque_minimo %}text-red-600{% else %}text-gray-700{% endif %}">
-                    {{ produto.estoque_atual }}
-                </td>
-                <td class="px-3 py-2 border-r text-right font-bold text-yellow-600">
-                    {{ produto.estoque_reservado }}
-                </td>
-                <td class="px-3 py-2 border-r text-right font-black text-blue-600">
-                    {{ produto.estoque_disponivel }}
-                </td>
-                <td class="px-3 py-2 text-right">
-                    <a href="{% url 'produto_update' produto.pk %}" class="text-blue-600 hover:underline font-bold">EDITAR</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" class="px-3 py-10 text-center text-gray-400 italic">Nenhum produto encontrado.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+<script>
+    function produtoListUi() {
+        return {
+            consultaModalOpen: false,
+            openModal() {
+                this.consultaModalOpen = true;
+            },
+            closeModal() {
+                this.consultaModalOpen = false;
+            }
+        }
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'F2') {
+            e.preventDefault();
+            window.location.href = "{% url 'produto_create' %}";
+        }
+        if (e.key === 'F5') {
+            e.preventDefault();
+            const root = document.querySelector('[x-data^="produtoListUi"]');
+            if (root && root.__x) {
+                root.__x.$data.openModal();
+            }
+        }
+    });
+</script>
 {% endblock %}

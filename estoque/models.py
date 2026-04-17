@@ -58,6 +58,41 @@ class Fornecedor(models.Model):
         return self.nome_fantasia
 
 
+class Unidade(models.Model):
+    nome = models.CharField(
+        max_length=200, unique=True, verbose_name="Unidade/Secretaria"
+    )
+
+    class Meta:
+        verbose_name = "Unidade"
+        verbose_name_plural = "Unidades"
+
+    def __str__(self):
+        return self.nome
+
+
+class Setor(models.Model):
+    unidade = models.ForeignKey(
+        Unidade,
+        on_delete=models.CASCADE,
+        related_name="setores",
+        verbose_name="Unidade",
+    )
+    nome = models.CharField(max_length=200)
+
+    class Meta:
+        verbose_name = "Setor"
+        verbose_name_plural = "Setores"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["unidade", "nome"], name="unique_setor_por_unidade"
+            )
+        ]
+
+    def __str__(self):
+        return self.nome
+
+
 class Produto(models.Model):
     UNIDADES_MEDIDA = [
         ("UN", "Unidade"),
@@ -70,6 +105,12 @@ class Produto(models.Model):
     nome = models.CharField(max_length=200)
     categoria = models.ForeignKey(
         Categoria, on_delete=models.PROTECT, related_name="produtos"
+    )
+    fornecedores = models.ManyToManyField(
+        Fornecedor,
+        blank=True,
+        related_name="produtos",
+        verbose_name="Fornecedores",
     )
     unidade_medida = models.CharField(
         max_length=3, choices=UNIDADES_MEDIDA, default="UN"
@@ -101,8 +142,22 @@ class Entrada(models.Model):
     numero_pedido = models.CharField(
         max_length=50, blank=True, verbose_name="Núm. Pedido"
     )
-    unidade = models.CharField(max_length=200, blank=True, verbose_name="Unidade")
-    setor = models.CharField(max_length=200, blank=True, verbose_name="Setor")
+    unidade = models.ForeignKey(
+        Unidade,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="entradas",
+        verbose_name="Unidade",
+    )
+    setor = models.ForeignKey(
+        Setor,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="entradas",
+        verbose_name="Setor",
+    )
     licitacao = models.CharField(max_length=200, blank=True, verbose_name="Licitação")
     lote = models.CharField(max_length=100, blank=True, verbose_name="Lote")
     compra_direta = models.BooleanField(default=False, verbose_name="Compra Direta?")
@@ -145,9 +200,21 @@ class Pedido(models.Model):
         ("CANCELADO", "Cancelado"),
     ]
     # Cabeçalho Principal (ERP-like)
-    secretaria = models.CharField(max_length=200, verbose_name="Unidade/Secretaria")
-    setor = models.CharField(
-        max_length=200, blank=True, verbose_name="Setor/Departamento"
+    secretaria = models.ForeignKey(
+        Unidade,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="pedidos",
+        verbose_name="Unidade/Secretaria",
+    )
+    setor = models.ForeignKey(
+        Setor,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="pedidos",
+        verbose_name="Setor/Departamento",
     )
     data_pedido = models.DateTimeField(auto_now_add=True, verbose_name="Data/Hora")
     status = models.CharField(
@@ -185,7 +252,8 @@ class Pedido(models.Model):
         verbose_name_plural = "Pedidos"
 
     def __str__(self):
-        return f"Pedido {self.id} - {self.secretaria} ({self.get_status_display()})"
+        unidade_nome = self.secretaria.nome if self.secretaria else "Sem unidade"
+        return f"Pedido {self.id} - {unidade_nome} ({self.get_status_display()})"
 
 
 class ItemPedido(models.Model):

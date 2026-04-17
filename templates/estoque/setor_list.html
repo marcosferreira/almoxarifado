@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Setores - Almoxarifado{% endblock %}
+
+{% block breadcrumb %}Setores{% endblock %}
+
+{% block content %}
+<div class="window-panel" x-data="setorListUi()" @keydown.escape.window="closePage()">
+    <div class="window-title">Cadastro de Setores</div>
+    <div class="p-2 flex flex-col xl:flex-row gap-3">
+        <div class="flex-1">
+            <div class="window-panel overflow-x-auto themed-table-wrap">
+                <table class="min-w-full text-[11px]">
+                    <thead class="themed-table-head uppercase">
+                        <tr>
+                            <th class="px-2 py-1 text-left themed-th w-12">Cód</th>
+                            <th class="px-2 py-1 text-left themed-th">Unidade</th>
+                            <th class="px-2 py-1 text-left themed-th">Setor</th>
+                            <th class="px-2 py-1 text-left themed-th w-36">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for setor in setores %}
+                        <tr class="themed-row cursor-pointer" @click="select('{{ setor.pk }}')" :class="selectedId === '{{ setor.pk }}' ? 'themed-ring' : ''">
+                            <td class="px-2 py-1 themed-td">{{ forloop.counter }}</td>
+                            <td class="px-2 py-1 themed-td themed-muted">{{ setor.unidade.nome|upper }}</td>
+                            <td class="px-2 py-1 themed-td font-semibold themed-strong">{{ setor.nome|upper }}</td>
+                            <td class="px-2 py-1 themed-td">
+                                <div class="flex items-center gap-2 text-[10px]">
+                                    <a href="{% url 'setor_update' setor.pk %}" class="font-bold hover:underline" style="color: var(--color-strong);">Editar</a>
+                                    <form method="post" action="{% url 'setor_delete' setor.pk %}" onsubmit="return confirm('Confirma exclusão do setor?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="font-bold hover:underline text-red-700">Excluir</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-3 py-8 text-center themed-td themed-muted">Nenhum setor cadastrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="w-full xl:w-40 space-y-2">
+            <a href="{% url 'setor_create' %}" class="action-btn">📄 Incluir <span>F2</span></a>
+            <button type="button" class="action-btn" @click="goToEdit()" :disabled="!selectedId" :class="!selectedId ? 'opacity-60 cursor-not-allowed' : ''">✏ Alterar <span>F3</span></button>
+            <button type="button" class="action-btn" @click="submitDelete()" :disabled="!selectedId" :class="!selectedId ? 'opacity-60 cursor-not-allowed' : ''">🗑 Excluir <span>F4</span></button>
+            <button type="button" class="action-btn" onclick="window.print()">🖨 Imprimir <span>F8</span></button>
+            <a href="{% url 'dashboard' %}" class="action-btn">🚪 Fechar <span>Esc</span></a>
+        </div>
+
+        <form id="setor-delete-form" method="post" class="hidden">
+            {% csrf_token %}
+        </form>
+    </div>
+</div>
+
+<script>
+    function setorListUi() {
+        return {
+            selectedId: '',
+            select(id) {
+                this.selectedId = String(id || '');
+            },
+            editUrl() {
+                if (!this.selectedId) return '';
+                return `{% url 'setor_update' 0 %}`.replace('/0/', `/${this.selectedId}/`);
+            },
+            deleteUrl() {
+                if (!this.selectedId) return '';
+                return `{% url 'setor_delete' 0 %}`.replace('/0/', `/${this.selectedId}/`);
+            },
+            goToEdit() {
+                const url = this.editUrl();
+                if (url) {
+                    window.location.href = url;
+                }
+            },
+            submitDelete() {
+                const url = this.deleteUrl();
+                if (!url) {
+                    return;
+                }
+                if (!window.confirm('Confirma exclusão do setor selecionado?')) {
+                    return;
+                }
+                const form = document.getElementById('setor-delete-form');
+                form.action = url;
+                form.submit();
+            },
+            closePage() {
+                window.location.href = "{% url 'dashboard' %}";
+            }
+        }
+    }
+
+    window.addEventListener('keydown', (e) => {
+        const root = document.querySelector('[x-data^="setorListUi"]');
+        const ui = root && root.__x ? root.__x.$data : null;
+
+        if (e.key === 'F2') {
+            e.preventDefault();
+            window.location.href = "{% url 'setor_create' %}";
+        }
+        if (e.key === 'F3' && ui) {
+            e.preventDefault();
+            ui.goToEdit();
+        }
+        if (e.key === 'F4' && ui) {
+            e.preventDefault();
+            ui.submitDelete();
+        }
+    });
+</script>
+{% endblock %}

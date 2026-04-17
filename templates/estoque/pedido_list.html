@@ -37,8 +37,8 @@
                     #{{ pedido.id|stringformat:"04d" }}
                 </td>
                 <td class="px-2 py-1 whitespace-nowrap font-bold themed-strong themed-td">
-                    {{ pedido.secretaria|upper }}
-                    {% if pedido.setor %}<span class="text-[9px] themed-muted block">{{ pedido.setor|upper }}</span>{% endif %}
+                    {{ pedido.secretaria.nome|default:'-'|upper }}
+                    {% if pedido.setor %}<span class="text-[9px] themed-muted block">{{ pedido.setor.nome|upper }}</span>{% endif %}
                 </td>
                 <td class="px-2 py-1 whitespace-nowrap themed-muted themed-td">
                     {{ pedido.data_pedido|date:"d/m/Y H:i" }}

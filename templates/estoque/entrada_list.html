@@ -38,8 +38,8 @@
                     {{ entrada.numero_nota|default:"S/N" }}
                 </td>
                 <td class="px-2 py-1 whitespace-nowrap themed-td themed-muted">{{ entrada.numero_pedido|default:"-" }}</td>
-                <td class="px-2 py-1 whitespace-nowrap themed-td themed-muted">{{ entrada.unidade|default:"-" }}</td>
-                <td class="px-2 py-1 whitespace-nowrap themed-td themed-muted">{{ entrada.setor|default:"-" }}</td>
+                <td class="px-2 py-1 whitespace-nowrap themed-td themed-muted">{{ entrada.unidade.nome|default:"-" }}</td>
+                <td class="px-2 py-1 whitespace-nowrap themed-td themed-muted">{{ entrada.setor.nome|default:"-" }}</td>
                 <td class="px-2 py-1 whitespace-nowrap themed-td themed-muted">
                     {{ entrada.itens.count }} itens
                 </td>

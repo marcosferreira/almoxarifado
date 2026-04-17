@@ -64,7 +64,7 @@
                     <tbody>
                         {% for item in consumo_secretaria %}
                         <tr class="themed-row">
-                            <td class="px-2 py-1 themed-td">{{ item.pedido__secretaria }}</td>
+                            <td class="px-2 py-1 themed-td">{{ item.pedido__secretaria__nome|default:"Sem unidade" }}</td>
                             <td class="px-2 py-1 themed-td text-right">{{ item.total_itens }}</td>
                         </tr>
                         {% empty %}

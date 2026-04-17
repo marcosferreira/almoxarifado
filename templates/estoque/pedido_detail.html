@@ -49,11 +49,11 @@
                     </div>
                     <div class="md:col-span-2">
                         <label>Unidade</label>
-                        <input type="text" value="{{ pedido.secretaria }}" disabled class="bg-white/90">
+                        <input type="text" value="{{ pedido.secretaria.nome|default:'' }}" disabled class="bg-white/90">
                     </div>
                     <div class="md:col-span-2">
                         <label>Setor</label>
-                        <input type="text" value="{{ pedido.setor }}" disabled class="bg-white/90">
+                        <input type="text" value="{{ pedido.setor.nome|default:'' }}" disabled class="bg-white/90">
                     </div>
                     <div>
                         <label>Compra Direta</label>

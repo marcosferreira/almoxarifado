@@ -41,7 +41,7 @@
                         {% for pedido in pedidos_recentes %}
                         <tr class="themed-row cursor-pointer" onclick="window.location='{% url 'pedido_detail' pedido.pk %}'">
                             <td class="p-2 themed-td font-bold themed-strong">#{{ pedido.id|stringformat:"04d" }}</td>
-                            <td class="p-2 themed-td">{{ pedido.secretaria|upper }}</td>
+                            <td class="p-2 themed-td">{{ pedido.secretaria.nome|default:'-'|upper }}</td>
                             <td class="p-2 themed-td">{{ pedido.data_pedido|date:"d/m/Y H:i" }}</td>
                             <td class="p-2 themed-td">{{ pedido.get_status_display }}</td>
                         </tr>
@@ -98,7 +98,7 @@
             <div class="themed-table-wrap">
                 {% for pedido in pedidos_pendentes_empenho %}
                 <a href="{% url 'pedido_detail' pedido.pk %}" class="block p-2 text-[12px] border-b themed-row" style="border-color: var(--color-table-cell-border);">
-                    <p class="font-semibold themed-strong">#{{ pedido.id }} - {{ pedido.secretaria|upper }}</p>
+                    <p class="font-semibold themed-strong">#{{ pedido.id }} - {{ pedido.secretaria.nome|default:'-'|upper }}</p>
                     <p class="themed-muted">{{ pedido.data_pedido|date:"d/m/Y H:i" }}</p>
                 </a>
                 {% empty %}

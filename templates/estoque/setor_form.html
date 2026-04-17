@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Almoxarifado{% endblock %}
+
+{% block breadcrumb %}Setores > {{ title }}{% endblock %}
+
+{% block content %}
+{% url 'setor_create' as setor_create_url %}
+{% url 'setor_list' as setor_list_url %}
+<div class="window-panel">
+    <div class="window-title">{{ title }} - Setor</div>
+    <div class="p-2 flex flex-col xl:flex-row gap-3">
+        <div class="flex-1">
+            <form method="post" id="setor-form" class="space-y-2">
+                {% csrf_token %}
+
+                <div class="section-box text-[12px]">
+                    <div class="window-title -mx-3 -mt-3 mb-3">Dados do Setor</div>
+                    <div class="grid grid-cols-1 md:grid-cols-6 gap-2">
+                        <div class="md:col-span-3">
+                            <label>{{ form.unidade.label }}</label>
+                            {{ form.unidade }}
+                            {% if form.unidade.errors %}<p class="text-[11px] text-red-700 mt-1">{{ form.unidade.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-3">
+                            <label>{{ form.nome.label }}</label>
+                            {{ form.nome }}
+                            {% if form.nome.errors %}<p class="text-[11px] text-red-700 mt-1">{{ form.nome.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% include 'components/action_sidebar_standard.html' with save_form_id='setor-form' include_url=setor_create_url consulta_url=setor_list_url print_onclick='window.print()' close_url=setor_list_url %}
+    </div>
+</div>
+
+<script>
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'F7') {
+            e.preventDefault();
+            document.getElementById('setor-form').submit();
+        }
+        if (e.key === 'F2') {
+            e.preventDefault();
+            window.location.href = "{% url 'setor_create' %}";
+        }
+        if (e.key === 'Escape') {
+            window.location.href = "{% url 'setor_list' %}";
+        }
+    });
+</script>
+{% endblock %}

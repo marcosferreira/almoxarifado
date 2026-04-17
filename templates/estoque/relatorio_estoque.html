@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório de Estoque - Almoxarifado{% endblock %}
+
+{% block breadcrumb %}Relatórios > Estoque{% endblock %}
+
+{% block content %}
+<div class="window-panel">
+    <div class="window-title">Relatório de Estoque</div>
+    <div class="p-2 grid grid-cols-1 xl:grid-cols-[1fr_120px] gap-3">
+        <div class="space-y-2">
+            <div class="section-box text-[12px]">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+                    <div>
+                        <label>Total Produtos</label>
+                        <div class="themed-strong">{{ total_produtos }}</div>
+                    </div>
+                    <div>
+                        <label>Itens Críticos</label>
+                        <div class="text-red-700 font-semibold">{{ produtos_criticos }}</div>
+                    </div>
+                    <div>
+                        <label>Estoque Atual</label>
+                        <div class="themed-strong">{{ total_estoque }}</div>
+                    </div>
+                    <div>
+                        <label>Reservado</label>
+                        <div class="themed-strong">{{ total_reservado }}</div>
+                    </div>
+                    <div>
+                        <label>Disponível</label>
+                        <div class="themed-strong">{{ total_disponivel }}</div>
+                    </div>
+                    <div>
+                        <label>Estoque Mínimo</label>
+                        <div class="themed-strong">{{ total_minimo }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="window-panel overflow-x-auto themed-table-wrap">
+                <table class="min-w-full text-[12px]">
+                    <thead class="themed-table-head">
+                        <tr>
+                            <th class="px-2 py-1 themed-th text-left">Categoria</th>
+                            <th class="px-2 py-1 themed-th text-left">Produto</th>
+                            <th class="px-2 py-1 themed-th text-right">Atual</th>
+                            <th class="px-2 py-1 themed-th text-right">Reservado</th>
+                            <th class="px-2 py-1 themed-th text-right">Disponível</th>
+                            <th class="px-2 py-1 themed-th text-right">Mínimo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produto in produtos %}
+                        <tr class="themed-row">
+                            <td class="px-2 py-1 themed-td">{{ produto.categoria.nome|default:"Sem categoria" }}</td>
+                            <td class="px-2 py-1 themed-td">{{ produto.nome }}</td>
+                            <td class="px-2 py-1 themed-td text-right">{{ produto.estoque_atual }}</td>
+                            <td class="px-2 py-1 themed-td text-right">{{ produto.estoque_reservado }}</td>
+                            <td class="px-2 py-1 themed-td text-right">{{ produto.estoque_disponivel }}</td>
+                            <td class="px-2 py-1 themed-td text-right{% if produto.estoque_atual < produto.estoque_minimo %} text-red-700 font-semibold{% endif %}">{{ produto.estoque_minimo }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="px-2 py-4 themed-td text-center">Nenhum produto cadastrado.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <button onclick="window.print()" class="action-btn">Imprimir <span>F8</span></button>
+            <a href="{% url 'dashboard' %}" class="action-btn">Fechar <span>Esc</span></a>
+        </div>
+    </div>
+</div>
+{% endblock %}

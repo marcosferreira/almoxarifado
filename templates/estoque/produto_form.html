@@ -27,6 +27,11 @@
                             {{ form.categoria }}
                             {% if form.categoria.errors %}<p class="text-[11px] text-red-700 mt-1">{{ form.categoria.errors.0 }}</p>{% endif %}
                         </div>
+                        <div class="md:col-span-3">
+                            <label>{{ form.fornecedores.label }}</label>
+                            {{ form.fornecedores }}
+                            {% if form.fornecedores.errors %}<p class="text-[11px] text-red-700 mt-1">{{ form.fornecedores.errors.0 }}</p>{% endif %}
+                        </div>
                         <div class="md:col-span-1">
                             <label>{{ form.unidade_medida.label }}</label>
                             {{ form.unidade_medida }}

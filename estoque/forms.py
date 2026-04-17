@@ -9,6 +9,8 @@ from .models import (
     ItemPedido,
     Categoria,
     PerfilUsuario,
+    Unidade,
+    Setor,
 )
 
 
@@ -24,10 +26,31 @@ class FornecedorForm(forms.ModelForm):
         fields = ["nome_fantasia", "razao_social", "cnpj", "contato", "telefone"]
 
 
+class UnidadeForm(forms.ModelForm):
+    class Meta:
+        model = Unidade
+        fields = ["nome"]
+
+
+class SetorForm(forms.ModelForm):
+    class Meta:
+        model = Setor
+        fields = ["unidade", "nome"]
+
+
 class ProdutoForm(forms.ModelForm):
     class Meta:
         model = Produto
-        fields = ["nome", "categoria", "unidade_medida", "estoque_minimo"]
+        fields = [
+            "nome",
+            "categoria",
+            "fornecedores",
+            "unidade_medida",
+            "estoque_minimo",
+        ]
+        widgets = {
+            "fornecedores": forms.SelectMultiple(attrs={"size": 6}),
+        }
 
 
 class EntradaForm(forms.ModelForm):
@@ -51,6 +74,22 @@ class EntradaForm(forms.ModelForm):
             "data_entrada": forms.DateInput(attrs={"type": "date"}),
             "observacoes": forms.Textarea(attrs={"rows": 3}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["unidade"].queryset = Unidade.objects.order_by("nome")
+        self.fields["setor"].queryset = Setor.objects.none()
+
+        unidade_id = None
+        if self.is_bound:
+            unidade_id = self.data.get("unidade")
+        elif self.instance and self.instance.pk and self.instance.unidade_id:
+            unidade_id = self.instance.unidade_id
+
+        if unidade_id:
+            self.fields["setor"].queryset = Setor.objects.filter(
+                unidade_id=unidade_id
+            ).order_by("nome")
 
 
 class ItemEntradaForm(forms.ModelForm):
@@ -76,6 +115,22 @@ class PedidoForm(forms.ModelForm):
         widgets = {
             "observacoes": forms.Textarea(attrs={"rows": 2}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["secretaria"].queryset = Unidade.objects.order_by("nome")
+        self.fields["setor"].queryset = Setor.objects.none()
+
+        unidade_id = None
+        if self.is_bound:
+            unidade_id = self.data.get("secretaria")
+        elif self.instance and self.instance.pk and self.instance.secretaria_id:
+            unidade_id = self.instance.secretaria_id
+
+        if unidade_id:
+            self.fields["setor"].queryset = Setor.objects.filter(
+                unidade_id=unidade_id
+            ).order_by("nome")
 
 
 class ItemPedidoForm(forms.ModelForm):

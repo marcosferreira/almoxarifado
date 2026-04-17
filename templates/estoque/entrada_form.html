@@ -140,20 +140,26 @@
                     <div class="grid grid-cols-1 md:grid-cols-[1fr_120px_120px_auto] gap-2 items-end">
                         <div>
                             <label>Produto</label>
-                            <select>
-                                <option>Selecione o produto</option>
+                            <select x-model="modalProdutoId" :disabled="!canSelectProdutos()">
+                                <option value="">Selecione o produto</option>
+                                <template x-for="produto in produtosFornecedor" :key="produto.id">
+                                    <option :value="String(produto.id)" x-text="produto.nome + ' (' + produto.unidade_medida + ')' "></option>
+                                </template>
                             </select>
                         </div>
                         <div>
                             <label>Quantidade</label>
-                            <input type="number" step="0.01" placeholder="0,00">
+                            <input type="number" step="0.01" placeholder="0,00" x-model="modalQuantidade">
                         </div>
                         <div>
                             <label>Valor Unitário</label>
-                            <input type="number" step="0.01" placeholder="0,00">
+                            <input type="number" step="0.01" placeholder="0,00" x-model="modalPrecoUnitario">
                         </div>
-                        <button type="button" class="action-btn w-auto">Adicionar <span>Enter</span></button>
+                        <button type="button" class="action-btn w-auto" @click="addItemFromModal()">Adicionar <span>Enter</span></button>
                     </div>
+                    <p class="text-[11px] themed-muted" x-show="isLoadingProdutos">Carregando produtos do fornecedor...</p>
+                    <p class="text-[11px] text-amber-700" x-show="!isLoadingProdutos && !selectedFornecedorId">Selecione o fornecedor para listar os produtos.</p>
+                    <p class="text-[11px] text-amber-700" x-show="!isLoadingProdutos && selectedFornecedorId && produtosFornecedor.length === 0">Nenhum produto encontrado para este fornecedor.</p>
                 </div>
                 <div class="window-panel themed-table-wrap overflow-x-auto">
                     <table class="min-w-full text-[11px]">
@@ -230,9 +236,40 @@
         return {
             itensModalOpen: false,
             consultaModalOpen: false,
+            selectedFornecedorId: '',
+            produtosFornecedor: [],
+            isLoadingProdutos: false,
+            modalProdutoId: '',
+            modalQuantidade: '',
+            modalPrecoUnitario: '',
+            selectedUnidadeId: '',
+            isLoadingSetores: false,
+            init() {
+                const fornecedorSelect = document.getElementById('id_fornecedor');
+                if (fornecedorSelect) {
+                    this.selectedFornecedorId = fornecedorSelect.value || '';
+                    fornecedorSelect.addEventListener('change', () => {
+                        this.selectedFornecedorId = fornecedorSelect.value || '';
+                        this.modalProdutoId = '';
+                        this.carregarProdutosFornecedor();
+                    });
+                    this.carregarProdutosFornecedor();
+                }
+
+                const unidadeSelect = document.getElementById('id_unidade');
+                if (unidadeSelect) {
+                    this.selectedUnidadeId = unidadeSelect.value || '';
+                    unidadeSelect.addEventListener('change', () => {
+                        this.selectedUnidadeId = unidadeSelect.value || '';
+                        this.carregarSetoresUnidade();
+                    });
+                    this.carregarSetoresUnidade();
+                }
+            },
             openItensModal() {
                 this.closeAllModals();
                 this.itensModalOpen = true;
+                this.carregarProdutosFornecedor();
             },
             openConsultaModal() {
                 this.closeAllModals();
@@ -241,6 +278,130 @@
             closeAllModals() {
                 this.itensModalOpen = false;
                 this.consultaModalOpen = false;
+            },
+            canSelectProdutos() {
+                return Boolean(this.selectedFornecedorId) && !this.isLoadingProdutos;
+            },
+            updateSetorOptions(setorSelect, setores) {
+                const currentValue = setorSelect.value;
+                setorSelect.innerHTML = '<option value="">---------</option>';
+                setores.forEach((setor) => {
+                    const option = document.createElement('option');
+                    option.value = String(setor.id);
+                    option.textContent = setor.nome;
+                    setorSelect.appendChild(option);
+                });
+                const hasCurrent = setores.some((setor) => String(setor.id) === String(currentValue));
+                setorSelect.value = hasCurrent ? currentValue : '';
+                setorSelect.disabled = !this.selectedUnidadeId || this.isLoadingSetores;
+            },
+            async carregarSetoresUnidade() {
+                const setorSelect = document.getElementById('id_setor');
+                if (!setorSelect) {
+                    return;
+                }
+
+                if (!this.selectedUnidadeId) {
+                    this.updateSetorOptions(setorSelect, []);
+                    return;
+                }
+
+                this.isLoadingSetores = true;
+                this.updateSetorOptions(setorSelect, []);
+
+                try {
+                    const response = await fetch(`{% url 'setores_por_unidade' %}?unidade_id=${encodeURIComponent(this.selectedUnidadeId)}`);
+                    if (!response.ok) {
+                        throw new Error('Falha ao carregar setores');
+                    }
+                    const data = await response.json();
+                    this.updateSetorOptions(setorSelect, data.setores || []);
+                } catch (_) {
+                    this.updateSetorOptions(setorSelect, []);
+                } finally {
+                    this.isLoadingSetores = false;
+                    setorSelect.disabled = !this.selectedUnidadeId;
+                }
+            },
+            async carregarProdutosFornecedor() {
+                this.produtosFornecedor = [];
+                this.applyProdutosToFormRows([]);
+                if (!this.selectedFornecedorId) {
+                    return;
+                }
+
+                this.isLoadingProdutos = true;
+                try {
+                    const response = await fetch(`{% url 'produtos_por_fornecedor' %}?fornecedor_id=${encodeURIComponent(this.selectedFornecedorId)}`);
+                    if (!response.ok) {
+                        throw new Error('Falha ao carregar produtos');
+                    }
+                    const data = await response.json();
+                    this.produtosFornecedor = data.produtos || [];
+                    this.applyProdutosToFormRows(this.produtosFornecedor);
+                } catch (_) {
+                    this.produtosFornecedor = [];
+                    this.applyProdutosToFormRows([]);
+                } finally {
+                    this.isLoadingProdutos = false;
+                }
+            },
+            buildOptionLabel(produto) {
+                return `${produto.nome} (${produto.unidade_medida})`;
+            },
+            updateSelectOptions(selectEl, produtos) {
+                const currentValue = selectEl.value;
+                selectEl.innerHTML = '<option value="">---------</option>';
+                produtos.forEach((produto) => {
+                    const option = document.createElement('option');
+                    option.value = String(produto.id);
+                    option.textContent = this.buildOptionLabel(produto);
+                    selectEl.appendChild(option);
+                });
+                const hasCurrent = produtos.some((produto) => String(produto.id) === String(currentValue));
+                selectEl.value = hasCurrent ? currentValue : '';
+            },
+            applyProdutosToFormRows(produtos) {
+                document.querySelectorAll('select[name$="-produto"]').forEach((selectEl) => {
+                    this.updateSelectOptions(selectEl, produtos);
+                });
+            },
+            addItemFromModal() {
+                if (!this.modalProdutoId) {
+                    return;
+                }
+
+                const rows = Array.from(document.querySelectorAll('tr.item-form'));
+                const row = rows.find((tr) => {
+                    const produtoSelect = tr.querySelector('select[name$="-produto"]');
+                    return produtoSelect && !produtoSelect.value;
+                }) || rows[0];
+
+                if (!row) {
+                    return;
+                }
+
+                const produtoSelect = row.querySelector('select[name$="-produto"]');
+                const quantidadeInput = row.querySelector('input[name$="-quantidade"]');
+                const precoInput = row.querySelector('input[name$="-preco_unitario"]');
+
+                if (produtoSelect) {
+                    produtoSelect.value = String(this.modalProdutoId);
+                    produtoSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                if (quantidadeInput) {
+                    quantidadeInput.value = this.modalQuantidade || '';
+                    quantidadeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                if (precoInput) {
+                    precoInput.value = this.modalPrecoUnitario || '';
+                    precoInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+
+                this.modalProdutoId = '';
+                this.modalQuantidade = '';
+                this.modalPrecoUnitario = '';
+                this.itensModalOpen = false;
             },
             numBySuffix(tr, suffix) {
                 const input = tr.querySelector(`input[name$="-${suffix}"]`);

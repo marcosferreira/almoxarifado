@@ -29,13 +29,13 @@ class FornecedorForm(forms.ModelForm):
 class UnidadeForm(forms.ModelForm):
     class Meta:
         model = Unidade
-        fields = ["nome"]
+        fields = ["nome", "representante", "cargo_representante"]
 
 
 class SetorForm(forms.ModelForm):
     class Meta:
         model = Setor
-        fields = ["unidade", "nome"]
+        fields = ["unidade", "nome", "representante", "cargo_representante"]
 
 
 class ProdutoForm(forms.ModelForm):

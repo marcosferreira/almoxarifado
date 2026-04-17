@@ -26,15 +26,15 @@ class FornecedorAdmin(admin.ModelAdmin):
 
 @admin.register(Unidade)
 class UnidadeAdmin(admin.ModelAdmin):
-    list_display = ("nome",)
-    search_fields = ("nome",)
+    list_display = ("nome", "representante", "cargo_representante")
+    search_fields = ("nome", "representante", "cargo_representante")
 
 
 @admin.register(Setor)
 class SetorAdmin(admin.ModelAdmin):
-    list_display = ("nome", "unidade")
+    list_display = ("nome", "unidade", "representante", "cargo_representante")
     list_filter = ("unidade",)
-    search_fields = ("nome", "unidade__nome")
+    search_fields = ("nome", "unidade__nome", "representante", "cargo_representante")
 
 
 @admin.register(Produto)

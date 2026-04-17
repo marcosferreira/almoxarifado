@@ -29,6 +29,16 @@
                             {{ form.nome }}
                             {% if form.nome.errors %}<p class="text-[11px] text-red-700 mt-1">{{ form.nome.errors.0 }}</p>{% endif %}
                         </div>
+                        <div class="md:col-span-3">
+                            <label>{{ form.representante.label }}</label>
+                            {{ form.representante }}
+                            {% if form.representante.errors %}<p class="text-[11px] text-red-700 mt-1">{{ form.representante.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-3">
+                            <label>{{ form.cargo_representante.label }}</label>
+                            {{ form.cargo_representante }}
+                            {% if form.cargo_representante.errors %}<p class="text-[11px] text-red-700 mt-1">{{ form.cargo_representante.errors.0 }}</p>{% endif %}
+                        </div>
                     </div>
                 </div>
             </form>

@@ -62,6 +62,18 @@ class Unidade(models.Model):
     nome = models.CharField(
         max_length=200, unique=True, verbose_name="Unidade/Secretaria"
     )
+    representante = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        verbose_name="Representante",
+    )
+    cargo_representante = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        verbose_name="Cargo do Representante",
+    )
 
     class Meta:
         verbose_name = "Unidade"
@@ -79,6 +91,18 @@ class Setor(models.Model):
         verbose_name="Unidade",
     )
     nome = models.CharField(max_length=200)
+    representante = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        verbose_name="Representante",
+    )
+    cargo_representante = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        verbose_name="Cargo do Representante",
+    )
 
     class Meta:
         verbose_name = "Setor"

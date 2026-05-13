@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Pedido #{{ pedido.pk }}</title>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #111; margin: 0; padding: 20px; }
+  .header { border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 12px; }
+  .header h1 { font-size: 16px; margin: 0 0 4px; }
+  .header p { margin: 2px 0; color: #555; }
+  .section { margin-bottom: 14px; }
+  .section-title { font-weight: bold; font-size: 12px; border-bottom: 1px solid #ccc; margin-bottom: 6px; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .field label { display: block; font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 2px; }
+  .field p { margin: 0; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: #f0f0f0; border: 1px solid #ccc; padding: 4px 8px; text-align: left; font-size: 10px; text-transform: uppercase; }
+  tbody td { border: 1px solid #ddd; padding: 4px 8px; }
+  tbody tr:nth-child(even) { background: #fafafa; }
+  .text-right { text-align: right; }
+  .status { display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold; font-size: 10px; text-transform: uppercase; }
+  .footer { margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px; font-size: 10px; color: #888; text-align: center; }
+  @page { margin: 2cm; size: A4; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Guia de Saída — Pedido #{{ pedido.pk }}</h1>
+  <p>Emitido em: {{ pedido.data_pedido|date:"d/m/Y H:i" }}</p>
+</div>
+
+<div class="section">
+  <div class="section-title">Dados do Pedido</div>
+  <div class="grid2">
+    <div class="field"><label>Secretaria</label><p>{{ pedido.secretaria.nome|default:"—" }}</p></div>
+    <div class="field"><label>Status</label><p>{{ pedido.get_status_display }}</p></div>
+    <div class="field"><label>Solicitante</label><p>{{ pedido.solicitante.get_full_name|default:pedido.solicitante.username }}</p></div>
+    <div class="field"><label>Data do Pedido</label><p>{{ pedido.data_pedido|date:"d/m/Y" }}</p></div>
+    <div class="field"><label>Endereço de Entrega</label><p>{{ pedido.endereco_entrega|default:"—" }}</p></div>
+    <div class="field"><label>Observações</label><p>{{ pedido.observacoes|default:"—" }}</p></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Itens do Pedido</div>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Produto</th>
+        <th>Unid.</th>
+        <th class="text-right">Qtd Solicitada</th>
+        <th class="text-right">Qtd Atendida</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in pedido.itens.all %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ item.produto.nome }}</td>
+        <td>{{ item.produto.unidade_medida }}</td>
+        <td class="text-right">{{ item.quantidade }}</td>
+        <td class="text-right">{{ item.quantidade_atendida }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" style="text-align:center;color:#888">Nenhum item.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="footer">
+  Sistema de Almoxarifado — documento gerado automaticamente — sem validade sem assinatura
+</div>
+</body>
+</html>

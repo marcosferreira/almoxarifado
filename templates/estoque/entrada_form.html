@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
-{% block title %}Nova Entrada - Almoxarifado{% endblock %}
+{% block title %}{% if is_edit %}Editar Entrada{% else %}Nova Entrada{% endif %} - Almoxarifado{% endblock %}
 
-{% block breadcrumb %}Entradas > Registrar Nova{% endblock %}
+{% block breadcrumb %}Entradas > {% if is_edit %}Editar{% else %}Registrar Nova{% endif %}{% endblock %}
 
 {% block content %}
 <div class="window-panel" x-data="itemManager()" @keydown.escape.window="closeAllModals()">
@@ -69,6 +69,35 @@
             </div>
 
             <div class="window-panel overflow-x-auto themed-table-wrap">
+                {% if is_edit %}
+                <p class="px-3 py-1 text-[11px] themed-muted italic border-b" style="border-color: var(--color-table-head-border);">
+                    Os itens não podem ser alterados após o registro. Para corrigir itens, exclua esta entrada e crie uma nova.
+                </p>
+                <table class="min-w-full text-[11px]">
+                    <thead class="themed-table-head">
+                    <tr>
+                        <th class="px-2 py-1 themed-th text-left">Cód</th>
+                        <th class="px-2 py-1 themed-th text-left">Descrição</th>
+                        <th class="px-2 py-1 themed-th text-right w-24">Quant.</th>
+                        <th class="px-2 py-1 themed-th text-right w-24">Vlr Unit</th>
+                        <th class="px-2 py-1 themed-th text-right w-24">Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in entrada.itens.all %}
+                    <tr class="themed-row">
+                        <td class="px-2 py-1 themed-td">{{ forloop.counter }}</td>
+                        <td class="px-2 py-1 themed-td font-semibold themed-strong">{{ item.produto.nome }}</td>
+                        <td class="px-2 py-1 themed-td text-right">{{ item.quantidade }}</td>
+                        <td class="px-2 py-1 themed-td text-right">{{ item.preco_unitario }}</td>
+                        <td class="px-2 py-1 themed-td text-right font-semibold">R$ {{ item.quantidade|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="px-3 py-4 themed-td themed-muted text-center">Nenhum item registrado.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
                 {{ formset.management_form }}
                 <table class="min-w-full text-[11px]" id="item-table">
                     <thead class="themed-table-head">
@@ -115,14 +144,18 @@
                 <div class="p-2 text-right text-[12px] font-bold themed-strong themed-table-head border-t" style="border-color: var(--color-table-head-border);">
                     Total geral: R$ <span x-text="calcGrandTotal()">0,00</span>
                 </div>
+                {% endif %}
             </div>
         </div>
 
         <div class="w-full xl:w-40 space-y-2">
             <button type="submit" class="action-btn">💾 Salvar <span>F7</span></button>
             <a href="{% url 'entrada_create' %}" class="action-btn">📄 Incluir <span>F2</span></a>
-            <button type="button" class="action-btn">✏ Alterar <span>F3</span></button>
-            <button type="button" class="action-btn">🗑 Excluir <span>F4</span></button>
+            {% if is_edit %}
+            <a href="{% url 'entrada_delete' entrada.pk %}" class="action-btn" onclick="return confirm('Confirma exclusão desta entrada? O estoque será estornado.');">🗑 Excluir <span>F4</span></a>
+            {% else %}
+            <button type="button" @click="openItensModal()" class="action-btn">➕ Itens <span>F6</span></button>
+            {% endif %}
             <button type="button" @click="openConsultaModal()" class="action-btn">🔍 Consulta <span>F5</span></button>
             <button type="button" class="action-btn" onclick="window.print()">🖨 Imprimir <span></span></button>
             <a href="{% url 'entrada_list' %}" class="action-btn">🚪 Fechar <span>Esc</span></a>

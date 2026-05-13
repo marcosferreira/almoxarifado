@@ -39,7 +39,7 @@
                     </thead>
                     <tbody>
                         {% for produto in produtos %}
-                        <tr class="themed-row">
+                        <tr class="themed-row cursor-pointer" @click="select('{{ produto.pk }}')" :class="selectedId === '{{ produto.pk }}' ? 'themed-ring' : ''">
                             <td class="px-2 py-1 themed-td">{{ forloop.counter }}</td>
                             <td class="px-2 py-1 themed-td font-semibold themed-strong">{{ produto.nome|upper }}</td>
                             <td class="px-2 py-1 themed-td themed-muted">{{ produto.categoria.nome|upper }}</td>
@@ -48,7 +48,13 @@
                             <td class="px-2 py-1 themed-td text-right text-amber-700">{{ produto.estoque_reservado }}</td>
                             <td class="px-2 py-1 themed-td text-right font-bold" style="color: var(--color-ring);">{{ produto.estoque_disponivel }}</td>
                             <td class="px-2 py-1 themed-td text-right">
-                                <a href="{% url 'produto_update' produto.pk %}" class="font-bold hover:underline" style="color: var(--color-strong);">Editar</a>
+                                <div class="flex items-center justify-end gap-2 text-[10px]">
+                                    <a href="{% url 'produto_update' produto.pk %}" class="font-bold hover:underline" style="color: var(--color-strong);">Editar</a>
+                                    <form method="post" action="{% url 'produto_delete' produto.pk %}" onsubmit="return confirm('Confirma exclusão do produto?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="font-bold hover:underline text-red-700">Excluir</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         {% empty %}
@@ -63,10 +69,16 @@
 
         <div class="w-full xl:w-40 space-y-2">
             <a href="{% url 'produto_create' %}" class="action-btn">📄 Incluir <span>F2</span></a>
+            <button type="button" class="action-btn" @click="goToEdit()" :disabled="!selectedId" :class="!selectedId ? 'opacity-60 cursor-not-allowed' : ''">✏ Alterar <span>F3</span></button>
+            <button type="button" class="action-btn" @click="submitDelete()" :disabled="!selectedId" :class="!selectedId ? 'opacity-60 cursor-not-allowed' : ''">🗑 Excluir <span>F4</span></button>
             <button type="button" class="action-btn" @click="openModal()">🔍 Consulta <span>F5</span></button>
-            <button type="button" class="action-btn" onclick="window.print()">🖨 Imprimir <span>F8</span></button>
+            <a :href="selectedId ? '/produtos/' + selectedId + '/ficha-pdf/' : '#'" target="_blank" class="action-btn" :class="!selectedId ? 'opacity-60 cursor-not-allowed' : ''">📄 Ficha PDF <span>F8</span></a>
             <a href="{% url 'dashboard' %}" class="action-btn">🚪 Fechar <span>Esc</span></a>
         </div>
+
+        <form id="produto-delete-form" method="post" class="hidden">
+            {% csrf_token %}
+        </form>
     </div>
 
     <div x-show="consultaModalOpen" x-cloak class="erp-modal-overlay" @click.self="closeModal()">
@@ -102,7 +114,31 @@
 <script>
     function produtoListUi() {
         return {
+            selectedId: '',
             consultaModalOpen: false,
+            select(id) {
+                this.selectedId = String(id || '');
+            },
+            editUrl() {
+                if (!this.selectedId) return '';
+                return `{% url 'produto_update' 0 %}`.replace('/0/', `/${this.selectedId}/`);
+            },
+            deleteUrl() {
+                if (!this.selectedId) return '';
+                return `{% url 'produto_delete' 0 %}`.replace('/0/', `/${this.selectedId}/`);
+            },
+            goToEdit() {
+                const url = this.editUrl();
+                if (url) window.location.href = url;
+            },
+            submitDelete() {
+                const url = this.deleteUrl();
+                if (!url) return;
+                if (!window.confirm('Confirma exclusão do produto selecionado?')) return;
+                const form = document.getElementById('produto-delete-form');
+                form.action = url;
+                form.submit();
+            },
             openModal() {
                 this.consultaModalOpen = true;
             },
@@ -113,16 +149,24 @@
     }
 
     window.addEventListener('keydown', (e) => {
+        const root = document.querySelector('[x-data^="produtoListUi"]');
+        const ui = root && root.__x ? root.__x.$data : null;
+
         if (e.key === 'F2') {
             e.preventDefault();
             window.location.href = "{% url 'produto_create' %}";
         }
+        if (e.key === 'F3' && ui) {
+            e.preventDefault();
+            ui.goToEdit();
+        }
+        if (e.key === 'F4' && ui) {
+            e.preventDefault();
+            ui.submitDelete();
+        }
         if (e.key === 'F5') {
             e.preventDefault();
-            const root = document.querySelector('[x-data^="produtoListUi"]');
-            if (root && root.__x) {
-                root.__x.$data.openModal();
-            }
+            if (ui) ui.openModal();
         }
     });
 </script>

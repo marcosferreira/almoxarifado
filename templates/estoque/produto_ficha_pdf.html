@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Ficha de Produto — {{ produto.nome }}</title>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #111; margin: 0; padding: 20px; }
+  .header { border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 12px; }
+  .header h1 { font-size: 16px; margin: 0 0 4px; }
+  .header p { margin: 2px 0; color: #555; }
+  .section { margin-bottom: 14px; }
+  .section-title { font-weight: bold; font-size: 12px; border-bottom: 1px solid #ccc; margin-bottom: 6px; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .field label { display: block; font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 2px; }
+  .field p { margin: 0; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+  thead th { background: #f0f0f0; border: 1px solid #ccc; padding: 4px 8px; text-align: left; font-size: 10px; text-transform: uppercase; }
+  tbody td { border: 1px solid #ddd; padding: 4px 8px; }
+  tbody tr:nth-child(even) { background: #fafafa; }
+  .text-right { text-align: right; }
+  .footer { margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px; font-size: 10px; color: #888; text-align: center; }
+  @page { margin: 2cm; size: A4; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Ficha de Produto</h1>
+  <p>{{ produto.nome }}{% if produto.categoria %} — {{ produto.categoria.nome }}{% endif %}</p>
+</div>
+
+<div class="section">
+  <div class="section-title">Dados do Produto</div>
+  <div class="grid3">
+    <div class="field"><label>Nome</label><p>{{ produto.nome }}</p></div>
+    <div class="field"><label>Categoria</label><p>{{ produto.categoria.nome|default:"—" }}</p></div>
+    <div class="field"><label>Unidade de Medida</label><p>{{ produto.unidade_medida }}</p></div>
+    <div class="field"><label>Estoque Físico</label><p>{{ produto.estoque_atual }}</p></div>
+    <div class="field"><label>Estoque Reservado</label><p>{{ produto.estoque_reservado }}</p></div>
+    <div class="field"><label>Estoque Disponível</label><p>{{ produto.estoque_disponivel }}</p></div>
+    <div class="field"><label>Estoque Mínimo</label><p>{{ produto.estoque_minimo }}</p></div>
+    <div class="field"><label>Descrição</label><p>{{ produto.descricao|default:"—" }}</p></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Últimas Entradas (50 registros)</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Nº Entrada</th>
+        <th class="text-right">Quantidade</th>
+        <th class="text-right">Preço Unit.</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in entradas %}
+      <tr>
+        <td>{{ item.entrada.data_entrada|date:"d/m/Y" }}</td>
+        <td>#{{ item.entrada.pk }}</td>
+        <td class="text-right">{{ item.quantidade }}</td>
+        <td class="text-right">{{ item.preco_unitario }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" style="text-align:center;color:#888">Nenhuma entrada registrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <div class="section-title">Últimas Saídas / Pedidos (50 registros)</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Pedido</th>
+        <th>Secretaria</th>
+        <th class="text-right">Solicitado</th>
+        <th class="text-right">Atendido</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in saidas %}
+      <tr>
+        <td>{{ item.pedido.data_pedido|date:"d/m/Y" }}</td>
+        <td>#{{ item.pedido.pk }}</td>
+        <td>{{ item.pedido.secretaria.nome|default:"—" }}</td>
+        <td class="text-right">{{ item.quantidade }}</td>
+        <td class="text-right">{{ item.quantidade_atendida }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" style="text-align:center;color:#888">Nenhuma saída registrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="footer">
+  Sistema de Almoxarifado — documento gerado automaticamente — sem validade sem assinatura
+</div>
+</body>
+</html>

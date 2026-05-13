@@ -145,7 +145,7 @@
             <a href="{% url 'pedido_create' %}" class="action-btn">📄 Incluir <span>F2</span></a>
             <button type="button" class="action-btn">✏ Alterar <span>F3</span></button>
             <button type="button" class="action-btn">🗑 Excluir <span>F4</span></button>
-            <button type="button" onclick="window.print()" class="action-btn">🖨 Imprimir <span></span></button>
+            <a href="{% url 'pedido_pdf' pedido.pk %}" target="_blank" class="action-btn">📄 PDF <span>F8</span></a>
             <a href="{% url 'pedido_list' %}" class="action-btn">🚪 Fechar <span>Esc</span></a>
         </div>
     </div>

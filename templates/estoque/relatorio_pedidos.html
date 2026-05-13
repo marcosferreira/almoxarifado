@@ -9,6 +9,40 @@
     <div class="window-title">Relatório de Pedidos</div>
     <div class="p-2 grid grid-cols-1 xl:grid-cols-[1fr_120px] gap-3">
         <div class="space-y-2">
+            <form method="get" class="section-box text-[12px]">
+                <div class="grid grid-cols-1 md:grid-cols-[140px_140px_1fr_1fr_auto] gap-2 items-end">
+                    <div>
+                        <label>Data de</label>
+                        <input type="date" name="data_de" value="{{ data_de }}">
+                    </div>
+                    <div>
+                        <label>Data até</label>
+                        <input type="date" name="data_ate" value="{{ data_ate }}">
+                    </div>
+                    <div>
+                        <label>Status</label>
+                        <select name="status">
+                            <option value="">Todos</option>
+                            {% for val, label in status_choices %}
+                            <option value="{{ val }}" {% if status_filtro == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>Secretaria</label>
+                        <select name="secretaria_id">
+                            <option value="">Todas</option>
+                            {% for u in unidades %}
+                            <option value="{{ u.pk }}" {% if secretaria_id == u.pk|stringformat:"s" %}selected{% endif %}>{{ u.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="action-btn w-auto">Filtrar</button>
+                    </div>
+                </div>
+            </form>
+
             <div class="section-box text-[12px]">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                     <div>
@@ -86,8 +120,10 @@
         </div>
 
         <div class="space-y-2">
-            <button onclick="window.print()" class="action-btn">Imprimir <span>F8</span></button>
-            <a href="{% url 'dashboard' %}" class="action-btn">Fechar <span>Esc</span></a>
+            <a href="?{{ request.GET.urlencode }}&export=csv" class="action-btn">⬇ CSV</a>
+            <a href="?{{ request.GET.urlencode }}&export=xlsx" class="action-btn">⬇ XLSX</a>
+            <button onclick="window.print()" class="action-btn">🖨 Imprimir <span>F8</span></button>
+            <a href="{% url 'dashboard' %}" class="action-btn">🚪 Fechar <span>Esc</span></a>
         </div>
     </div>
 </div>

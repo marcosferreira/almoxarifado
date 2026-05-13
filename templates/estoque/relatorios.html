@@ -6,30 +6,33 @@
 
 {% block content %}
 <div class="window-panel">
-    <div class="window-title">Relatório de Entradas por Grupo</div>
+    <div class="window-title">Relatório de Movimentações</div>
     <div class="p-2 grid grid-cols-1 xl:grid-cols-[1fr_120px] gap-3">
         <div class="space-y-2">
-            <div class="section-box text-[12px]">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <form method="get" class="section-box text-[12px]">
+                <div class="grid grid-cols-1 md:grid-cols-[140px_140px_1fr_auto] gap-2 items-end">
                     <div>
-                        <label>Período</label>
-                        <select><option>Todas</option></select>
+                        <label>Data de</label>
+                        <input type="date" name="data_de" value="{{ data_de }}">
                     </div>
                     <div>
-                        <label>Grupo</label>
-                        <select><option>Todos</option></select>
+                        <label>Data até</label>
+                        <input type="date" name="data_ate" value="{{ data_ate }}">
                     </div>
                     <div>
-                        <label>Unidade</label>
-                        <select><option>Todos</option></select>
+                        <label>Secretaria</label>
+                        <select name="secretaria_id">
+                            <option value="">Todas</option>
+                            {% for u in unidades %}
+                            <option value="{{ u.pk }}" {% if secretaria_id == u.pk|stringformat:"s" %}selected{% endif %}>{{ u.nome }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="flex items-end">
-                        <label class="inline-flex items-center gap-2 text-[12px] normal-case">
-                            <input type="checkbox"> Compra Direta
-                        </label>
+                        <button type="submit" class="action-btn w-auto">Filtrar</button>
                     </div>
                 </div>
-            </div>
+            </form>
 
             <div class="window-panel overflow-x-auto themed-table-wrap">
                 <table class="min-w-full text-[12px]">
@@ -76,8 +79,10 @@
         </div>
 
         <div class="space-y-2">
-            <button onclick="window.print()" class="action-btn">Imprimir <span>F8</span></button>
-            <a href="{% url 'dashboard' %}" class="action-btn">Fechar <span>Esc</span></a>
+            <a href="?{{ request.GET.urlencode }}&export=csv" class="action-btn">⬇ CSV</a>
+            <a href="?{{ request.GET.urlencode }}&export=xlsx" class="action-btn">⬇ XLSX</a>
+            <button onclick="window.print()" class="action-btn">🖨 Imprimir <span>F8</span></button>
+            <a href="{% url 'dashboard' %}" class="action-btn">🚪 Fechar <span>Esc</span></a>
         </div>
     </div>
 </div>

@@ -5,32 +5,99 @@
 {% block breadcrumb %}Diversos > Importar Licitações{% endblock %}
 
 {% block content %}
-<div class="window-panel max-w-4xl">
-    <div class="window-title">Importar Licitações</div>
+<div class="window-panel max-w-5xl">
+    <div class="window-title">Importar Licitações / Contratos</div>
     <div class="p-3 space-y-3 text-[12px]">
+
         <form method="post" enctype="multipart/form-data" class="space-y-3">
             {% csrf_token %}
-            <div class="section-box grid grid-cols-1 md:grid-cols-[1fr_42px] gap-2 items-center">
-                <input type="file" name="arquivo" required>
-                <button type="button" class="action-btn justify-center">...</button>
+            <div class="section-box">
+                <div class="window-title -mx-3 -mt-3 mb-3">Arquivo</div>
+                <div class="grid grid-cols-1 md:grid-cols-[1fr_200px_auto] gap-2 items-end">
+                    <div>
+                        <label>Planilha (.xlsx)</label>
+                        <input type="file" name="arquivo" accept=".xlsx">
+                        <p class="text-[11px] themed-muted mt-1">
+                            Arquivo pode conter múltiplas abas (proponentes). Estrutura esperada por aba: linha 1 — dados do proponente, linha 2 — mensagem, linha 3 — cabeçalhos, a partir da linha 4 — produtos (<strong>col B</strong> = descrição, <strong>col D</strong> = quantidade, <strong>col E</strong> = preço unitário).
+                        </p>
+                    </div>
+                    <div>
+                        <label>Identificação da Licitação</label>
+                        <input type="text" name="licitacao_nome" value="{{ licitacao_nome }}" placeholder="Ex.: Pregão 01/2026">
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <button type="submit" class="action-btn w-auto">🔍 Pré-visualizar</button>
+                        <button type="submit" name="importar_direto" value="1" class="action-btn w-auto bg-green-700 text-white">✅ Importar</button>
+                    </div>
+                </div>
             </div>
 
-            <div class="section-box grid grid-cols-1 md:grid-cols-[1fr_160px] gap-2 items-center">
-                <div>
-                    <label>Grupo</label>
-                    <input type="text" value="INDEFINIDO">
-                </div>
-                <div class="space-y-2">
-                    <button type="submit" class="action-btn">Importar Licitação <span></span></button>
-                    <button type="button" class="action-btn">Importar Contratos <span></span></button>
-                    <button type="button" class="action-btn">Importar Aditivos <span></span></button>
-                    <a href="{% url 'dashboard' %}" class="action-btn justify-center">Fechar</a>
-                </div>
+            {% if erros %}
+            <div class="section-box border-red-400 bg-red-50 space-y-1">
+                <p class="font-bold text-red-700">Erros encontrados — corrija o arquivo antes de importar:</p>
+                {% for erro in erros %}
+                <p class="text-red-600">{{ erro }}</p>
+                {% endfor %}
             </div>
-
-            <div class="section-box min-h-[300px] themed-table-wrap" style="border-color: var(--color-border);"></div>
-            <div class="themed-table-wrap text-center py-1" style="border: 1px solid var(--color-border);">0%</div>
+            {% endif %}
         </form>
+
+        {% if preview %}
+        <div class="window-panel overflow-x-auto themed-table-wrap">
+            <div class="window-title">Pré-visualização — {{ preview|length }} linha(s)</div>
+            <table class="min-w-full text-[11px]">
+                <thead class="themed-table-head">
+                    <tr>
+                        <th class="px-2 py-1 themed-th text-left">#</th>
+                        <th class="px-2 py-1 themed-th text-left">Proponente</th>
+                        <th class="px-2 py-1 themed-th text-left">Produto no arquivo</th>
+                        <th class="px-2 py-1 themed-th text-left">Produto no sistema</th>
+                        <th class="px-2 py-1 themed-th text-right w-24">Quantidade</th>
+                        <th class="px-2 py-1 themed-th text-right w-28">Preço Unit.</th>
+                        <th class="px-2 py-1 themed-th text-center w-20">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for linha in preview %}
+                    <tr class="themed-row {% if linha.criara_novo %}bg-yellow-50{% endif %}">
+                        <td class="px-2 py-1 themed-td">{{ forloop.counter }}</td>
+                        <td class="px-2 py-1 themed-td themed-muted">{{ linha.proponente }}</td>
+                        <td class="px-2 py-1 themed-td themed-strong">{{ linha.nome }}</td>
+                        <td class="px-2 py-1 themed-td themed-muted">{{ linha.produto.nome|default:"Será criado" }}</td>
+                        <td class="px-2 py-1 themed-td text-right">{{ linha.quantidade }}</td>
+                        <td class="px-2 py-1 themed-td text-right">{{ linha.preco }}</td>
+                        <td class="px-2 py-1 themed-td text-center">
+                            {% if linha.encontrado %}
+                            <span class="text-green-700 font-semibold">✓ Encontrado</span>
+                            {% else %}
+                            <span class="text-yellow-700 font-semibold">+ Novo (será criado)</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if not erros %}
+        <form method="post" class="section-box flex items-center justify-between">
+            {% csrf_token %}
+            <input type="hidden" name="licitacao_nome" value="{{ licitacao_nome }}">
+            <p class="themed-muted">
+                Para cada proponente será criada uma <strong>Entrada</strong> no sistema.
+                Produtos <strong>não encontrados</strong> no cadastro serão criados automaticamente na categoria
+                <strong>Importação Licitação</strong>.
+            </p>
+            <button type="submit" name="confirmar" value="1" class="action-btn w-auto bg-green-700 text-white">
+                ✅ Confirmar Importação
+            </button>
+        </form>
+        {% endif %}
+        {% endif %}
+
+        <div class="flex justify-end">
+            <a href="{% url 'dashboard' %}" class="action-btn w-auto">🚪 Fechar</a>
+        </div>
     </div>
 </div>
 {% endblock %}

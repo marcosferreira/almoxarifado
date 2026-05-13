@@ -1,7 +1,7 @@
 # State
 
-**Last Updated:** 2026-05-11T00:00:00-03:00
-**Current Work:** Project initialization — brownfield mapping
+**Last Updated:** 2026-05-13T00:00:00-03:00
+**Current Work:** Milestone 2/3/4 — todos os 9 todos implementados e testados
 
 ---
 
@@ -51,8 +51,15 @@ None
 
 ## Todos
 
-- [ ] User wants reports/relatórios improvement as next feature
-- [ ] Data integrity (stock race condition) flagged as concern by user
+- [x] Relatórios básicos — já implementados (3 views: movimento, estoque, pedidos)
+- [x] Fechar lacunas de CRUD: exclusão de Produto, edição/exclusão de Fornecedor e Entrada (Milestone 2)
+- [x] Corrigir race condition de reserva de estoque com `select_for_update()` (Milestone 2)
+- [x] Implementar permissões por papel (Almoxarife, Comprador, Solicitante, Admin) (Milestone 2)
+- [x] Geração de PDF para guia de saída e ficha de produto (Milestone 3)
+- [x] Relatórios avançados com filtros por data, exportação CSV/XLSX (Milestone 3)
+- [x] Implementar importação real de licitação via planilha (substituir placeholder) (Milestone 3)
+- [x] Adicionar testes de signals, views e formulários — 19 testes (Milestone 4)
+- [x] Dividir views.py em pacote views/ por entidade (Milestone 4)
 
 ---
 

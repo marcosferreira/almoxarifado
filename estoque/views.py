@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from decimal import Decimal
+from functools import wraps
+import csv
+from io import BytesIO
 
 from django.db.models import Count, F, Sum
 from django.db.models.deletion import ProtectedError
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
@@ -32,6 +35,21 @@ from .forms import (
     PerfilUsuarioForm,
     PerfilTemaForm,
 )
+
+
+def _tem_papel(*nomes_grupos):
+    """Retorna True se o usuário pertence a um dos grupos ou é superusuário."""
+    def decorator(view_func):
+        @wraps(view_func)
+        @login_required
+        def _wrapped(request, *args, **kwargs):
+            if request.user.is_superuser or request.user.groups.filter(name__in=nomes_grupos).exists():
+                return view_func(request, *args, **kwargs)
+            messages.error(request, "Você não tem permissão para acessar esta funcionalidade.")
+            return redirect("dashboard")
+        return _wrapped
+    return decorator
+
 
 
 def _to_decimal(value):
@@ -115,7 +133,7 @@ def produto_list(request):
     )
 
 
-@login_required
+@_tem_papel("Almoxarife", "Administrador")
 def produto_create(request):
     form = ProdutoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -127,7 +145,7 @@ def produto_create(request):
     )
 
 
-@login_required
+@_tem_papel("Almoxarife", "Administrador")
 def produto_update(request, pk):
     produto = get_object_or_404(Produto, pk=pk)
     form = ProdutoForm(request.POST or None, instance=produto)
@@ -149,7 +167,7 @@ def fornecedor_list(request):
     )
 
 
-@login_required
+@_tem_papel("Almoxarife", "Comprador", "Administrador")
 def fornecedor_create(request):
     form = FornecedorForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -170,7 +188,7 @@ def unidade_list(request):
     return render(request, "estoque/unidade_list.html", {"unidades": unidades})
 
 
-@login_required
+@_tem_papel("Almoxarife", "Administrador")
 def unidade_create(request):
     form = UnidadeForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -184,7 +202,7 @@ def unidade_create(request):
     )
 
 
-@login_required
+@_tem_papel("Almoxarife", "Administrador")
 def unidade_update(request, pk):
     unidade = get_object_or_404(Unidade, pk=pk)
     form = UnidadeForm(request.POST or None, instance=unidade)
@@ -199,7 +217,7 @@ def unidade_update(request, pk):
     )
 
 
-@login_required
+@_tem_papel("Almoxarife", "Administrador")
 def unidade_delete(request, pk):
     unidade = get_object_or_404(Unidade, pk=pk)
     if request.method == "POST":
@@ -223,7 +241,7 @@ def setor_list(request):
     return render(request, "estoque/setor_list.html", {"setores": setores})
 
 
-@login_required
+@_tem_papel("Almoxarife", "Administrador")
 def setor_create(request):
     form = SetorForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -237,7 +255,7 @@ def setor_create(request):
     )
 
 
-@login_required
+@_tem_papel("Almoxarife", "Administrador")
 def setor_update(request, pk):
     setor = get_object_or_404(Setor, pk=pk)
     form = SetorForm(request.POST or None, instance=setor)
@@ -252,7 +270,7 @@ def setor_update(request, pk):
     )
 
 
-@login_required
+@_tem_papel("Almoxarife", "Administrador")
 def setor_delete(request, pk):
     setor = get_object_or_404(Setor, pk=pk)
     if request.method == "POST":
@@ -278,7 +296,7 @@ def entrada_list(request):
     return render(request, "estoque/entrada_list.html", {"entradas": entradas})
 
 
-@login_required
+@_tem_papel("Almoxarife", "Administrador")
 def entrada_create(request):
     entrada_form = EntradaForm(request.POST or None)
     formset = ItemEntradaFormSet(request.POST or None)
@@ -317,7 +335,7 @@ def pedido_list(request):
     )
 
 
-@login_required
+@_tem_papel("Almoxarife", "Comprador", "Solicitante", "Administrador")
 def pedido_create(request):
     pedido_form = PedidoForm(request.POST or None)
     formset = ItemPedidoFormSet(request.POST or None)
@@ -392,6 +410,37 @@ def pedido_detail(request, pk):
 
 
 # --- RELATÓRIOS ---
+def _export_csv(filename, headers, rows):
+    response = HttpResponse(content_type="text/csv; charset=utf-8-sig")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    writer = csv.writer(response)
+    writer.writerow(headers)
+    for row in rows:
+        writer.writerow(row)
+    return response
+
+
+def _export_xlsx(filename, sheets):
+    from openpyxl import Workbook
+    wb = Workbook()
+    for i, (sheet_name, headers, rows) in enumerate(sheets):
+        ws = wb.active if i == 0 else wb.create_sheet(title=sheet_name)
+        if i == 0:
+            ws.title = sheet_name
+        ws.append(headers)
+        for row in rows:
+            ws.append([str(v) if v is not None else "" for v in row])
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    response = HttpResponse(
+        buffer,
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
 @login_required
 def relatorios(request):
     return redirect("relatorio_movimento")
@@ -399,38 +448,76 @@ def relatorios(request):
 
 @login_required
 def relatorio_movimento(request):
-    produtos = Produto.objects.all().order_by("categoria__nome", "nome")
+    data_de = request.GET.get("data_de", "")
+    data_ate = request.GET.get("data_ate", "")
+    secretaria_id = request.GET.get("secretaria_id", "")
 
-    # Consumo por Secretaria (Simples)
+    consumo_qs = ItemPedido.objects.filter(pedido__status="ENTREGUE")
+    if data_de:
+        consumo_qs = consumo_qs.filter(pedido__data_pedido__date__gte=data_de)
+    if data_ate:
+        consumo_qs = consumo_qs.filter(pedido__data_pedido__date__lte=data_ate)
+    if secretaria_id:
+        consumo_qs = consumo_qs.filter(pedido__secretaria_id=secretaria_id)
+
     consumo_secretaria = (
-        ItemPedido.objects.filter(pedido__status="ENTREGUE")
+        consumo_qs
         .values("pedido__secretaria__nome")
         .annotate(total_itens=Sum("quantidade"))
         .order_by("-total_itens")
     )
 
+    entradas_qs = ItemEntrada.objects.all()
+    if data_de:
+        entradas_qs = entradas_qs.filter(entrada__data_entrada__gte=data_de)
+    if data_ate:
+        entradas_qs = entradas_qs.filter(entrada__data_entrada__lte=data_ate)
+
     entradas_por_grupo = (
-        ItemEntrada.objects.values("produto__categoria__nome")
+        entradas_qs
+        .values("produto__categoria__nome")
         .annotate(total_quantidade=Sum("quantidade"))
         .order_by("-total_quantidade")
     )
 
+    export = request.GET.get("export", "")
+    if export == "csv":
+        rows = [[r["pedido__secretaria__nome"] or "Sem secretaria", r["total_itens"]] for r in consumo_secretaria]
+        return _export_csv("consumo_secretaria.csv", ["Secretaria", "Total Itens"], rows)
+    if export == "xlsx":
+        rows_consumo = [[r["pedido__secretaria__nome"] or "Sem secretaria", r["total_itens"]] for r in consumo_secretaria]
+        rows_entradas = [[r["produto__categoria__nome"] or "Sem categoria", r["total_quantidade"]] for r in entradas_por_grupo]
+        return _export_xlsx("relatorio_movimento.xlsx", [
+            ("Consumo por Secretaria", ["Secretaria", "Total Itens"], rows_consumo),
+            ("Entradas por Categoria", ["Categoria", "Total Quantidade"], rows_entradas),
+        ])
+
+    unidades = Unidade.objects.order_by("nome")
     return render(
         request,
         "estoque/relatorios.html",
         {
-            "produtos": produtos,
             "consumo_secretaria": consumo_secretaria,
             "entradas_por_grupo": entradas_por_grupo,
+            "data_de": data_de,
+            "data_ate": data_ate,
+            "secretaria_id": secretaria_id,
+            "unidades": unidades,
         },
     )
 
 
 @login_required
 def relatorio_estoque(request):
-    produtos = Produto.objects.select_related("categoria").order_by(
-        "categoria__nome", "nome"
-    )
+    categoria_id = request.GET.get("categoria_id", "")
+    apenas_criticos = request.GET.get("apenas_criticos", "")
+
+    produtos = Produto.objects.select_related("categoria").order_by("categoria__nome", "nome")
+    if categoria_id:
+        produtos = produtos.filter(categoria_id=categoria_id)
+    if apenas_criticos:
+        produtos = produtos.filter(estoque_atual__lt=F("estoque_minimo"))
+
     totais = produtos.aggregate(
         total_estoque=Sum("estoque_atual"),
         total_reservado=Sum("estoque_reservado"),
@@ -439,26 +526,57 @@ def relatorio_estoque(request):
     total_estoque = _to_decimal(totais.get("total_estoque"))
     total_reservado = _to_decimal(totais.get("total_reservado"))
 
+    export = request.GET.get("export", "")
+    if export in ("csv", "xlsx"):
+        headers = ["Produto", "Categoria", "Unid.", "Físico", "Reservado", "Disponível", "Mínimo"]
+        rows = [
+            [
+                p.nome, p.categoria.nome, p.unidade_medida,
+                p.estoque_atual, p.estoque_reservado, p.estoque_disponivel, p.estoque_minimo,
+            ]
+            for p in produtos
+        ]
+        if export == "csv":
+            return _export_csv("relatorio_estoque.csv", headers, rows)
+        return _export_xlsx("relatorio_estoque.xlsx", [("Estoque", headers, rows)])
+
+    from .models import Categoria
+    categorias = Categoria.objects.order_by("nome")
     return render(
         request,
         "estoque/relatorio_estoque.html",
         {
             "produtos": produtos,
             "total_produtos": produtos.count(),
-            "produtos_criticos": produtos.filter(
-                estoque_atual__lt=F("estoque_minimo")
-            ).count(),
+            "produtos_criticos": Produto.objects.filter(estoque_atual__lt=F("estoque_minimo")).count(),
             "total_estoque": total_estoque,
             "total_reservado": total_reservado,
             "total_disponivel": total_estoque - total_reservado,
             "total_minimo": _to_decimal(totais.get("total_minimo")),
+            "categorias": categorias,
+            "categoria_id": categoria_id,
+            "apenas_criticos": apenas_criticos,
         },
     )
 
 
 @login_required
 def relatorio_pedidos(request):
+    data_de = request.GET.get("data_de", "")
+    data_ate = request.GET.get("data_ate", "")
+    status_filtro = request.GET.get("status", "")
+    secretaria_id = request.GET.get("secretaria_id", "")
+
     pedidos = Pedido.objects.select_related("secretaria").order_by("-data_pedido")
+    if data_de:
+        pedidos = pedidos.filter(data_pedido__date__gte=data_de)
+    if data_ate:
+        pedidos = pedidos.filter(data_pedido__date__lte=data_ate)
+    if status_filtro:
+        pedidos = pedidos.filter(status=status_filtro)
+    if secretaria_id:
+        pedidos = pedidos.filter(secretaria_id=secretaria_id)
+
     resumo_status = (
         pedidos.values("status").annotate(total=Count("id")).order_by("status")
     )
@@ -471,30 +589,206 @@ def relatorio_pedidos(request):
         }
         for item in resumo_status
     ]
-    totais_itens = ItemPedido.objects.aggregate(
+    totais_itens = ItemPedido.objects.filter(pedido__in=pedidos).aggregate(
         total_solicitado=Sum("quantidade"),
         total_atendido=Sum("quantidade_atendida"),
     )
 
+    export = request.GET.get("export", "")
+    if export in ("csv", "xlsx"):
+        headers = ["ID", "Data", "Secretaria", "Status", "Endereço", "Observação"]
+        rows = [
+            [
+                p.pk,
+                p.data_pedido.strftime("%d/%m/%Y"),
+                p.secretaria.nome if p.secretaria else "",
+                p.get_status_display(),
+                p.endereco_entrega,
+                p.observacoes,
+            ]
+            for p in pedidos
+        ]
+        if export == "csv":
+            return _export_csv("relatorio_pedidos.csv", headers, rows)
+        return _export_xlsx("relatorio_pedidos.xlsx", [("Pedidos", headers, rows)])
+
+    unidades = Unidade.objects.order_by("nome")
     return render(
         request,
         "estoque/relatorio_pedidos.html",
         {
-            "pedidos": pedidos[:50],
+            "pedidos": pedidos[:100],
             "resumo_status": resumo_status_display,
             "total_pedidos": pedidos.count(),
             "total_solicitado": _to_decimal(totais_itens.get("total_solicitado")),
             "total_atendido": _to_decimal(totais_itens.get("total_atendido")),
+            "data_de": data_de,
+            "data_ate": data_ate,
+            "status_filtro": status_filtro,
+            "secretaria_id": secretaria_id,
+            "unidades": unidades,
+            "status_choices": Pedido.STATUS_CHOICES,
         },
     )
 
 
-@login_required
-def importar_licitacao(request):
+@_tem_papel("Almoxarife", "Comprador", "Administrador")
+def fornecedor_update(request, pk):
+    fornecedor = get_object_or_404(Fornecedor, pk=pk)
+    form = FornecedorForm(request.POST or None, instance=fornecedor)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Fornecedor atualizado com sucesso!")
+        return redirect("fornecedor_list")
+    return render(
+        request,
+        "estoque/fornecedor_form.html",
+        {"form": form, "title": "Editar Fornecedor"},
+    )
+
+
+@_tem_papel("Almoxarife", "Administrador")
+def fornecedor_delete(request, pk):
+    fornecedor = get_object_or_404(Fornecedor, pk=pk)
     if request.method == "POST":
-        messages.success(request, "Arquivo recebido para processamento de importação.")
-        return redirect("importar_licitacao")
-    return render(request, "estoque/importar_licitacao.html")
+        try:
+            fornecedor.delete()
+            messages.success(request, "Fornecedor excluído com sucesso!")
+        except ProtectedError:
+            messages.error(
+                request,
+                "Não foi possível excluir o fornecedor porque ele está vinculado a entradas ou pedidos.",
+            )
+    return redirect("fornecedor_list")
+
+
+@_tem_papel("Almoxarife", "Administrador")
+def produto_delete(request, pk):
+    produto = get_object_or_404(Produto, pk=pk)
+    if request.method == "POST":
+        try:
+            produto.delete()
+            messages.success(request, "Produto excluído com sucesso!")
+        except ProtectedError:
+            messages.error(
+                request,
+                "Não foi possível excluir o produto porque ele está vinculado a entradas ou pedidos.",
+            )
+    return redirect("produto_list")
+
+
+@_tem_papel("Almoxarife", "Comprador", "Administrador")
+def importar_licitacao(request):
+    preview = None
+    erros = []
+    licitacao_nome = ""
+
+    if request.method == "POST":
+        arquivo = request.FILES.get("arquivo")
+        licitacao_nome = request.POST.get("licitacao_nome", "").strip()
+        confirmar = request.POST.get("confirmar", "")
+
+        if not arquivo:
+            messages.error(request, "Selecione um arquivo XLSX para importar.")
+            return render(request, "estoque/importar_licitacao.html", {"licitacao_nome": licitacao_nome})
+
+        if not arquivo.name.endswith((".xlsx", ".xls")):
+            messages.error(request, "Apenas arquivos Excel (.xlsx ou .xls) são aceitos.")
+            return render(request, "estoque/importar_licitacao.html", {"licitacao_nome": licitacao_nome})
+
+        try:
+            from openpyxl import load_workbook
+            wb = load_workbook(arquivo, read_only=True, data_only=True)
+            ws = wb.active
+
+            linhas = []
+            for i, row in enumerate(ws.iter_rows(values_only=True)):
+                if i == 0:
+                    continue  # pula cabeçalho
+                nome_produto = str(row[0]).strip() if row[0] else ""
+                quantidade_raw = row[1] if len(row) > 1 else None
+                preco_raw = row[2] if len(row) > 2 else None
+
+                if not nome_produto:
+                    continue
+
+                try:
+                    quantidade = Decimal(str(quantidade_raw)) if quantidade_raw else Decimal("0")
+                    preco = Decimal(str(preco_raw)) if preco_raw else Decimal("0")
+                except Exception:
+                    erros.append(f"Linha {i + 1}: quantidade ou preço inválidos.")
+                    continue
+
+                produto = Produto.objects.filter(nome__iexact=nome_produto).first()
+                linhas.append({
+                    "nome": nome_produto,
+                    "produto": produto,
+                    "quantidade": quantidade,
+                    "preco": preco,
+                    "encontrado": produto is not None,
+                })
+
+            wb.close()
+
+            if confirmar and not erros:
+                importados = 0
+                for linha in linhas:
+                    if not linha["encontrado"]:
+                        continue
+                    produto = linha["produto"]
+                    produto.estoque_atual += linha["quantidade"]
+                    produto.save()
+                    importados += 1
+                messages.success(request, f"Importação concluída: {importados} produto(s) com estoque atualizado.")
+                return redirect("importar_licitacao")
+
+            preview = linhas
+
+        except Exception as e:
+            messages.error(request, f"Erro ao processar o arquivo: {e}")
+
+    return render(
+        request,
+        "estoque/importar_licitacao.html",
+        {
+            "preview": preview,
+            "erros": erros,
+            "licitacao_nome": licitacao_nome,
+        },
+    )
+
+
+@_tem_papel("Almoxarife", "Administrador")
+def entrada_update(request, pk):
+    entrada = get_object_or_404(Entrada, pk=pk)
+    form = EntradaForm(request.POST or None, instance=entrada)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Entrada atualizada com sucesso!")
+        return redirect("entrada_list")
+    return render(
+        request,
+        "estoque/entrada_form.html",
+        {
+            "entrada_form": form,
+            "formset": None,
+            "is_edit": True,
+            "entrada": entrada,
+        },
+    )
+
+
+@_tem_papel("Almoxarife", "Administrador")
+def entrada_delete(request, pk):
+    entrada = get_object_or_404(Entrada, pk=pk)
+    if request.method == "POST":
+        for item in entrada.itens.select_related("produto"):
+            produto = item.produto
+            produto.estoque_atual -= item.quantidade
+            produto.save()
+        entrada.delete()
+        messages.success(request, "Entrada excluída e estoque estornado com sucesso!")
+    return redirect("entrada_list")
 
 
 @login_required
@@ -530,4 +824,51 @@ def profile(request):
             "tema_form": tema_form,
             "senha_form": senha_form,
         },
+    )
+
+
+# --- PDF ---
+def _render_pdf(template_name, context, filename):
+    """Renderiza um template HTML como PDF usando WeasyPrint."""
+    from weasyprint import HTML
+    from django.template.loader import render_to_string
+    html_string = render_to_string(template_name, context)
+    pdf_file = HTML(string=html_string, base_url=None).write_pdf()
+    response = HttpResponse(pdf_file, content_type="application/pdf")
+    response["Content-Disposition"] = f'inline; filename="{filename}"'
+    return response
+
+
+@login_required
+def pedido_pdf(request, pk):
+    pedido = get_object_or_404(
+        Pedido.objects.select_related("secretaria", "solicitante").prefetch_related(
+            "itens__produto"
+        ),
+        pk=pk,
+    )
+    return _render_pdf(
+        "estoque/pedido_pdf.html",
+        {"pedido": pedido},
+        f"pedido_{pedido.pk}.pdf",
+    )
+
+
+@login_required
+def produto_ficha_pdf(request, pk):
+    produto = get_object_or_404(Produto.objects.select_related("categoria"), pk=pk)
+    entradas = (
+        ItemEntrada.objects.filter(produto=produto)
+        .select_related("entrada")
+        .order_by("-entrada__data_entrada")[:50]
+    )
+    saidas = (
+        ItemPedido.objects.filter(produto=produto)
+        .select_related("pedido__secretaria")
+        .order_by("-pedido__data_pedido")[:50]
+    )
+    return _render_pdf(
+        "estoque/produto_ficha_pdf.html",
+        {"produto": produto, "entradas": entradas, "saidas": saidas},
+        f"ficha_{produto.pk}.pdf",
     )

@@ -1,0 +1,29 @@
+from ._base import (
+    login_required, JsonResponse,
+    Produto, Setor,
+)
+
+
+@login_required
+def produtos_por_fornecedor(request):
+    fornecedor_id = request.GET.get("fornecedor_id")
+    if not fornecedor_id:
+        return JsonResponse({"produtos": []})
+
+    produtos = Produto.objects.filter(fornecedores__id=fornecedor_id).order_by("nome")
+    payload = [
+        {"id": p.id, "nome": p.nome, "unidade_medida": p.unidade_medida}
+        for p in produtos
+    ]
+    return JsonResponse({"produtos": payload})
+
+
+@login_required
+def setores_por_unidade(request):
+    unidade_id = request.GET.get("unidade_id")
+    if not unidade_id:
+        return JsonResponse({"setores": []})
+
+    setores = Setor.objects.filter(unidade_id=unidade_id).order_by("nome")
+    payload = [{"id": s.id, "nome": s.nome} for s in setores]
+    return JsonResponse({"setores": payload})

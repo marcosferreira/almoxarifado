@@ -21,6 +21,7 @@ urlpatterns = [
     path("produtos/", views.produto_list, name="produto_list"),
     path("produtos/novo/", views.produto_create, name="produto_create"),
     path("produtos/<int:pk>/editar/", views.produto_update, name="produto_update"),
+    path("produtos/<int:pk>/excluir/", views.produto_delete, name="produto_delete"),
     path(
         "api/setores-por-unidade/",
         views.setores_por_unidade,
@@ -34,6 +35,8 @@ urlpatterns = [
     # Fornecedores
     path("fornecedores/", views.fornecedor_list, name="fornecedor_list"),
     path("fornecedores/novo/", views.fornecedor_create, name="fornecedor_create"),
+    path("fornecedores/<int:pk>/editar/", views.fornecedor_update, name="fornecedor_update"),
+    path("fornecedores/<int:pk>/excluir/", views.fornecedor_delete, name="fornecedor_delete"),
     # Unidades
     path("unidades/", views.unidade_list, name="unidade_list"),
     path("unidades/nova/", views.unidade_create, name="unidade_create"),
@@ -47,6 +50,8 @@ urlpatterns = [
     # Entradas
     path("entradas/", views.entrada_list, name="entrada_list"),
     path("entradas/nova/", views.entrada_create, name="entrada_create"),
+    path("entradas/<int:pk>/editar/", views.entrada_update, name="entrada_update"),
+    path("entradas/<int:pk>/excluir/", views.entrada_delete, name="entrada_delete"),
     # Pedidos
     path("pedidos/", views.pedido_list, name="pedido_list"),
     path("pedidos/novo/", views.pedido_create, name="pedido_create"),
@@ -61,4 +66,7 @@ urlpatterns = [
     path("relatorios/estoque/", views.relatorio_estoque, name="relatorio_estoque"),
     path("relatorios/pedidos/", views.relatorio_pedidos, name="relatorio_pedidos"),
     path("importar-licitacao/", views.importar_licitacao, name="importar_licitacao"),
+    # PDF
+    path("pedidos/<int:pk>/pdf/", views.pedido_pdf, name="pedido_pdf"),
+    path("produtos/<int:pk>/ficha-pdf/", views.produto_ficha_pdf, name="produto_ficha_pdf"),
 ]

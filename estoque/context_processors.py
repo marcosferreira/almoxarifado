@@ -1,7 +1,11 @@
+from typing import Any
+
+from django.http import HttpRequest
+
 from .models import PerfilUsuario
 
 
-def tema_ui_context(request):
+def tema_ui_context(request: HttpRequest) -> dict[str, Any]:
     tema = "classic"
     if request.user.is_authenticated:
         try:

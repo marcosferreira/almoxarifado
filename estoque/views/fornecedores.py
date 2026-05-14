@@ -1,3 +1,4 @@
+from django.http import HttpRequest, HttpResponse
 from ._base import (
     render, redirect, get_object_or_404,
     messages, ProtectedError,
@@ -7,7 +8,7 @@ from ._base import (
 
 
 @login_required
-def fornecedor_list(request):
+def fornecedor_list(request: HttpRequest) -> HttpResponse:
     fornecedores = Fornecedor.objects.all()
     return render(
         request, "estoque/fornecedor_list.html", {"fornecedores": fornecedores}
@@ -15,7 +16,7 @@ def fornecedor_list(request):
 
 
 @_tem_papel("Almoxarife", "Comprador", "Administrador")
-def fornecedor_create(request):
+def fornecedor_create(request: HttpRequest) -> HttpResponse:
     form = FornecedorForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -29,7 +30,7 @@ def fornecedor_create(request):
 
 
 @_tem_papel("Almoxarife", "Comprador", "Administrador")
-def fornecedor_update(request, pk):
+def fornecedor_update(request: HttpRequest, pk: int) -> HttpResponse:
     fornecedor = get_object_or_404(Fornecedor, pk=pk)
     form = FornecedorForm(request.POST or None, instance=fornecedor)
     if request.method == "POST" and form.is_valid():
@@ -44,7 +45,7 @@ def fornecedor_update(request, pk):
 
 
 @_tem_papel("Almoxarife", "Administrador")
-def fornecedor_delete(request, pk):
+def fornecedor_delete(request: HttpRequest, pk: int) -> HttpResponse:
     fornecedor = get_object_or_404(Fornecedor, pk=pk)
     if request.method == "POST":
         try:

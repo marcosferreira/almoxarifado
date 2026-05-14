@@ -1,3 +1,4 @@
+from django.http import HttpRequest, HttpResponse
 from ._base import (
     render, redirect, get_object_or_404,
     messages, Decimal,
@@ -7,7 +8,7 @@ from ._base import (
 
 
 @login_required
-def pedido_list(request):
+def pedido_list(request: HttpRequest) -> HttpResponse:
     status_filter = request.GET.get("status")
     pedidos = (
         Pedido.objects.select_related("secretaria", "setor")
@@ -24,7 +25,7 @@ def pedido_list(request):
 
 
 @_tem_papel("Almoxarife", "Comprador", "Solicitante", "Administrador")
-def pedido_create(request):
+def pedido_create(request: HttpRequest) -> HttpResponse:
     pedido_form = PedidoForm(request.POST or None)
     formset = ItemPedidoFormSet(request.POST or None)
     if request.method == "POST":
@@ -42,7 +43,7 @@ def pedido_create(request):
 
 
 @login_required
-def pedido_detail(request, pk):
+def pedido_detail(request: HttpRequest, pk: int) -> HttpResponse:
     pedido = get_object_or_404(Pedido, pk=pk)
     empenho_form = AnexoEmpenhoForm(
         request.POST or None, request.FILES or None, instance=pedido

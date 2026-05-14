@@ -1,3 +1,4 @@
+from django.http import HttpRequest, HttpResponse
 from ._base import (
     render, redirect, get_object_or_404,
     messages, ProtectedError,
@@ -7,7 +8,7 @@ from ._base import (
 
 
 @login_required
-def produto_list(request):
+def produto_list(request: HttpRequest) -> HttpResponse:
     search = request.GET.get("search", "")
     produtos = Produto.objects.all()
     if search:
@@ -18,7 +19,7 @@ def produto_list(request):
 
 
 @_tem_papel("Almoxarife", "Administrador")
-def produto_create(request):
+def produto_create(request: HttpRequest) -> HttpResponse:
     form = ProdutoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -30,7 +31,7 @@ def produto_create(request):
 
 
 @_tem_papel("Almoxarife", "Administrador")
-def produto_update(request, pk):
+def produto_update(request: HttpRequest, pk: int) -> HttpResponse:
     produto = get_object_or_404(Produto, pk=pk)
     form = ProdutoForm(request.POST or None, instance=produto)
     if request.method == "POST" and form.is_valid():
@@ -43,7 +44,7 @@ def produto_update(request, pk):
 
 
 @_tem_papel("Almoxarife", "Administrador")
-def produto_delete(request, pk):
+def produto_delete(request: HttpRequest, pk: int) -> HttpResponse:
     produto = get_object_or_404(Produto, pk=pk)
     if request.method == "POST":
         try:

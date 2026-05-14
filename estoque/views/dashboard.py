@@ -1,3 +1,4 @@
+from django.http import HttpRequest, HttpResponse
 from ._base import (
     render, login_required, F,
     Produto, Pedido, Entrada,
@@ -5,7 +6,7 @@ from ._base import (
 
 
 @login_required
-def dashboard(request):
+def dashboard(request: HttpRequest) -> HttpResponse:
     total_produtos = Produto.objects.count()
     pedidos_reservados = Pedido.objects.filter(status="RESERVADO").count()
     entregas_realizadas = Pedido.objects.filter(status="ENTREGUE").count()

@@ -1,3 +1,4 @@
+from django.http import HttpRequest, HttpResponse
 from ._base import (
     render, redirect, get_object_or_404,
     messages,
@@ -7,7 +8,7 @@ from ._base import (
 
 
 @login_required
-def pedido_pdf(request, pk):
+def pedido_pdf(request: HttpRequest, pk: int) -> HttpResponse:
     pedido = get_object_or_404(
         Pedido.objects.select_related("secretaria").prefetch_related("itens__produto"),
         pk=pk,
@@ -20,7 +21,7 @@ def pedido_pdf(request, pk):
 
 
 @login_required
-def produto_ficha_pdf(request, pk):
+def produto_ficha_pdf(request: HttpRequest, pk: int) -> HttpResponse:
     produto = get_object_or_404(Produto.objects.select_related("categoria"), pk=pk)
     entradas = (
         ItemEntrada.objects.filter(produto=produto)

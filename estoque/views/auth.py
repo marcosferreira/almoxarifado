@@ -1,3 +1,4 @@
+from django.http import HttpRequest, HttpResponse
 from ._base import (
     render, redirect,
     messages,
@@ -8,7 +9,7 @@ from ._base import (
 
 
 @login_required
-def profile(request):
+def profile(request: HttpRequest) -> HttpResponse:
     perfil_usuario, _ = PerfilUsuario.objects.get_or_create(user=request.user)
     perfil_form = PerfilUsuarioForm(request.POST or None, instance=request.user)
     tema_form = PerfilTemaForm(request.POST or None, instance=perfil_usuario)

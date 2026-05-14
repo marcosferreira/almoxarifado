@@ -1,3 +1,4 @@
+from django.http import HttpRequest, HttpResponse
 from ._base import (
     render, redirect, get_object_or_404,
     messages, ProtectedError,
@@ -7,13 +8,13 @@ from ._base import (
 
 
 @login_required
-def unidade_list(request):
+def unidade_list(request: HttpRequest) -> HttpResponse:
     unidades = Unidade.objects.all().order_by("nome")
     return render(request, "estoque/unidade_list.html", {"unidades": unidades})
 
 
 @_tem_papel("Almoxarife", "Administrador")
-def unidade_create(request):
+def unidade_create(request: HttpRequest) -> HttpResponse:
     form = UnidadeForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -25,7 +26,7 @@ def unidade_create(request):
 
 
 @_tem_papel("Almoxarife", "Administrador")
-def unidade_update(request, pk):
+def unidade_update(request: HttpRequest, pk: int) -> HttpResponse:
     unidade = get_object_or_404(Unidade, pk=pk)
     form = UnidadeForm(request.POST or None, instance=unidade)
     if request.method == "POST" and form.is_valid():
@@ -40,7 +41,7 @@ def unidade_update(request, pk):
 
 
 @_tem_papel("Almoxarife", "Administrador")
-def unidade_delete(request, pk):
+def unidade_delete(request: HttpRequest, pk: int) -> HttpResponse:
     unidade = get_object_or_404(Unidade, pk=pk)
     if request.method == "POST":
         try:
@@ -55,7 +56,7 @@ def unidade_delete(request, pk):
 
 
 @login_required
-def setor_list(request):
+def setor_list(request: HttpRequest) -> HttpResponse:
     setores = (
         Setor.objects.select_related("unidade").all().order_by("unidade__nome", "nome")
     )
@@ -63,7 +64,7 @@ def setor_list(request):
 
 
 @_tem_papel("Almoxarife", "Administrador")
-def setor_create(request):
+def setor_create(request: HttpRequest) -> HttpResponse:
     form = SetorForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -75,7 +76,7 @@ def setor_create(request):
 
 
 @_tem_papel("Almoxarife", "Administrador")
-def setor_update(request, pk):
+def setor_update(request: HttpRequest, pk: int) -> HttpResponse:
     setor = get_object_or_404(Setor, pk=pk)
     form = SetorForm(request.POST or None, instance=setor)
     if request.method == "POST" and form.is_valid():
@@ -90,7 +91,7 @@ def setor_update(request, pk):
 
 
 @_tem_papel("Almoxarife", "Administrador")
-def setor_delete(request, pk):
+def setor_delete(request: HttpRequest, pk: int) -> HttpResponse:
     setor = get_object_or_404(Setor, pk=pk)
     if request.method == "POST":
         try:

@@ -1,11 +1,14 @@
+from typing import Any
+
+from django.http import HttpRequest, JsonResponse
 from ._base import (
-    login_required, JsonResponse,
+    login_required,
     Produto, Setor,
 )
 
 
 @login_required
-def produtos_por_fornecedor(request):
+def produtos_por_fornecedor(request: HttpRequest) -> JsonResponse:
     fornecedor_id = request.GET.get("fornecedor_id")
     if not fornecedor_id:
         return JsonResponse({"produtos": []})
@@ -19,7 +22,7 @@ def produtos_por_fornecedor(request):
 
 
 @login_required
-def setores_por_unidade(request):
+def setores_por_unidade(request: HttpRequest) -> JsonResponse:
     unidade_id = request.GET.get("unidade_id")
     if not unidade_id:
         return JsonResponse({"setores": []})

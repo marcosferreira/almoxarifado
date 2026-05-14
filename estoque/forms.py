@@ -1,3 +1,5 @@
+from typing import Any
+
 from django import forms
 from django.contrib.auth.models import User
 from .models import (
@@ -12,6 +14,27 @@ from .models import (
     Unidade,
     Setor,
 )
+
+
+class _DynamicSetorFilterMixin:
+    unidade_field: str
+    setor_field: str = "setor"
+
+    def _init_dynamic_setor_filter(self, unidade_field_name: str, setor_field_name: str = "setor") -> None:
+        unidade_queryset = Unidade.objects.order_by("nome")
+        self.fields[unidade_field_name].queryset = unidade_queryset  # type: ignore[attr-defined]
+        self.fields[setor_field_name].queryset = Setor.objects.none()  # type: ignore[attr-defined]
+
+        unidade_id: Any = None
+        if self.is_bound:  # type: ignore[attr-defined]
+            unidade_id = self.data.get(unidade_field_name)  # type: ignore[attr-defined]
+        elif self.instance and self.instance.pk:  # type: ignore[attr-defined]
+            unidade_id = getattr(self.instance, f"{unidade_field_name}_id", None)  # type: ignore[attr-defined]
+
+        if unidade_id:
+            self.fields[setor_field_name].queryset = Setor.objects.filter(  # type: ignore[attr-defined]
+                unidade_id=unidade_id
+            ).order_by("nome")
 
 
 class CategoriaForm(forms.ModelForm):
@@ -53,7 +76,7 @@ class ProdutoForm(forms.ModelForm):
         }
 
 
-class EntradaForm(forms.ModelForm):
+class EntradaForm(_DynamicSetorFilterMixin, forms.ModelForm):
     class Meta:
         model = Entrada
         fields = [
@@ -75,21 +98,9 @@ class EntradaForm(forms.ModelForm):
             "observacoes": forms.Textarea(attrs={"rows": 3}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.fields["unidade"].queryset = Unidade.objects.order_by("nome")
-        self.fields["setor"].queryset = Setor.objects.none()
-
-        unidade_id = None
-        if self.is_bound:
-            unidade_id = self.data.get("unidade")
-        elif self.instance and self.instance.pk and self.instance.unidade_id:
-            unidade_id = self.instance.unidade_id
-
-        if unidade_id:
-            self.fields["setor"].queryset = Setor.objects.filter(
-                unidade_id=unidade_id
-            ).order_by("nome")
+        self._init_dynamic_setor_filter("unidade")
 
 
 class ItemEntradaForm(forms.ModelForm):
@@ -98,7 +109,7 @@ class ItemEntradaForm(forms.ModelForm):
         fields = ["produto", "quantidade", "preco_unitario", "licitacao_restante"]
 
 
-class PedidoForm(forms.ModelForm):
+class PedidoForm(_DynamicSetorFilterMixin, forms.ModelForm):
     class Meta:
         model = Pedido
         fields = [
@@ -116,21 +127,9 @@ class PedidoForm(forms.ModelForm):
             "observacoes": forms.Textarea(attrs={"rows": 2}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.fields["secretaria"].queryset = Unidade.objects.order_by("nome")
-        self.fields["setor"].queryset = Setor.objects.none()
-
-        unidade_id = None
-        if self.is_bound:
-            unidade_id = self.data.get("secretaria")
-        elif self.instance and self.instance.pk and self.instance.secretaria_id:
-            unidade_id = self.instance.secretaria_id
-
-        if unidade_id:
-            self.fields["setor"].queryset = Setor.objects.filter(
-                unidade_id=unidade_id
-            ).order_by("nome")
+        self._init_dynamic_setor_filter("secretaria")
 
 
 class ItemPedidoForm(forms.ModelForm):

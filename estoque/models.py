@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -144,7 +145,7 @@ class Produto(models.Model):
     estoque_minimo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     @property
-    def estoque_disponivel(self):
+    def estoque_disponivel(self) -> Decimal:
         return self.estoque_atual - self.estoque_reservado
 
     class Meta:
@@ -181,6 +182,14 @@ class Entrada(models.Model):
         blank=True,
         related_name="entradas",
         verbose_name="Setor",
+    )
+    criado_por = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="entradas",
+        verbose_name="Criado por",
     )
     licitacao = models.CharField(max_length=200, blank=True, verbose_name="Licitação")
     lote = models.CharField(max_length=100, blank=True, verbose_name="Lote")
@@ -297,19 +306,19 @@ class ItemPedido(models.Model):
     )
 
     @property
-    def total_pedido(self):
+    def total_pedido(self) -> Decimal:
         return self.quantidade * self.preco_unitario
 
     @property
-    def total_atendido(self):
+    def total_atendido(self) -> Decimal:
         return self.quantidade_atendida * self.preco_unitario
 
     @property
-    def restante_licitacao(self):
+    def restante_licitacao(self) -> Decimal:
         return self.quantidade_licitada - self.quantidade_atendida
 
     @property
-    def percentual_licitado(self):
+    def percentual_licitado(self) -> float:
         if self.quantidade_licitada <= 0:
             return 0
         return (self.quantidade_atendida / self.quantidade_licitada) * 100

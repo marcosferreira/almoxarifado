@@ -1,4 +1,7 @@
 import re
+from typing import Any
+
+from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 from ._base import (
     render, redirect,
@@ -9,12 +12,12 @@ from ._base import (
 
 
 @login_required
-def relatorios(request):
+def relatorios(request: HttpRequest) -> HttpResponse:
     return redirect("relatorio_movimento")
 
 
 @login_required
-def relatorio_movimento(request):
+def relatorio_movimento(request: HttpRequest) -> HttpResponse:
     data_de = request.GET.get("data_de", "")
     data_ate = request.GET.get("data_ate", "")
     secretaria_id = request.GET.get("secretaria_id", "")
@@ -84,7 +87,7 @@ def relatorio_movimento(request):
 
 
 @login_required
-def relatorio_estoque(request):
+def relatorio_estoque(request: HttpRequest) -> HttpResponse:
     categoria_id = request.GET.get("categoria_id", "")
     apenas_criticos = request.GET.get("apenas_criticos", "")
 
@@ -137,7 +140,7 @@ def relatorio_estoque(request):
 
 
 @login_required
-def relatorio_pedidos(request):
+def relatorio_pedidos(request: HttpRequest) -> HttpResponse:
     data_de = request.GET.get("data_de", "")
     data_ate = request.GET.get("data_ate", "")
     status_filtro = request.GET.get("status", "")
@@ -208,7 +211,7 @@ def relatorio_pedidos(request):
     )
 
 
-def _parse_proponente(cell_text):
+def _parse_proponente(cell_text: str) -> tuple[str, str]:
     """Extrai nome e CNPJ do texto da célula A1 de cada aba."""
     lines = [l.strip() for l in str(cell_text).split("\n") if l.strip()]
     nome = lines[0] if lines else ""
@@ -221,14 +224,14 @@ def _parse_proponente(cell_text):
     return nome, cnpj
 
 
-def _normalizar_cnpj(cnpj_raw):
+def _normalizar_cnpj(cnpj_raw: str) -> str:
     digits = re.sub(r"\D", "", str(cnpj_raw or ""))
     if len(digits) != 14:
         return ""
     return f"{digits[:2]}.{digits[2:5]}.{digits[5:8]}/{digits[8:12]}-{digits[12:14]}"
 
 
-def _normalizar_texto_limite(valor, limite=200):
+def _normalizar_texto_limite(valor: str, limite: int = 200) -> str:
     texto = re.sub(r"\s+", " ", str(valor or "")).strip()
     if len(texto) <= limite:
         return texto
@@ -285,7 +288,7 @@ def _obter_ou_criar_produto(nome_produto):
     return produto, True
 
 
-def _executar_importacao(proponentes_sessao, licitacao_nome):
+def _executar_importacao(proponentes_sessao: list[dict[str, Any]], licitacao_nome: str, criado_por: Any = None) -> tuple[int, int]:
     """Cria Fornecedor, Entrada e ItemEntrada para cada proponente. Retorna o total importado."""
     importados = 0
     produtos_criados = 0
@@ -304,6 +307,7 @@ def _executar_importacao(proponentes_sessao, licitacao_nome):
             fornecedor=fornecedor,
             data_entrada=hoje,
             licitacao=licitacao_nome,
+            criado_por=criado_por,
         )
 
         for item in itens:
@@ -329,7 +333,7 @@ def _executar_importacao(proponentes_sessao, licitacao_nome):
 
 
 @_tem_papel("Almoxarife", "Comprador", "Administrador")
-def importar_licitacao(request):
+def importar_licitacao(request: HttpRequest) -> HttpResponse:
     preview = None
     erros = []
     licitacao_nome = ""
@@ -344,7 +348,7 @@ def importar_licitacao(request):
             if not proponentes_sessao:
                 messages.error(request, "Sessão expirada ou sem dados para importar. Faça o upload novamente.")
                 return render(request, "estoque/importar_licitacao.html", {"licitacao_nome": licitacao_nome})
-            importados, produtos_criados = _executar_importacao(proponentes_sessao, licitacao_nome)
+            importados, produtos_criados = _executar_importacao(proponentes_sessao, licitacao_nome, criado_por=request.user)
             messages.success(
                 request,
                 f"Importação concluída: {importados} item(ns) registrado(s) em entrada de estoque. Produtos novos criados: {produtos_criados}.",
@@ -433,7 +437,7 @@ def importar_licitacao(request):
 
             if importar_direto and not erros:
                 proponentes_sessao = request.session.pop("licitacao_importar", [])
-                importados, produtos_criados = _executar_importacao(proponentes_sessao, licitacao_nome)
+                importados, produtos_criados = _executar_importacao(proponentes_sessao, licitacao_nome, criado_por=request.user)
                 messages.success(
                     request,
                     f"Importação concluída: {importados} item(ns) registrado(s) em entrada de estoque. Produtos novos criados: {produtos_criados}.",

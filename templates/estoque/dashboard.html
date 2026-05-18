@@ -1,26 +1,66 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Dashboard - Almoxarifado{% endblock %}
 
 {% block breadcrumb %}Dashboard{% endblock %}
 
 {% block content %}
+{% if estoque_critico_count > 0 %}
+<div class="themed-attention p-3 mb-3 flex items-center justify-between text-[12px]">
+    <span>⚠ {{ estoque_critico_count }} produto(s) abaixo do estoque mínimo</span>
+    <a href="{% url 'relatorio_estoque' %}?apenas_criticos=1" class="font-bold hover:underline">Ver itens críticos →</a>
+</div>
+{% else %}
+<div class="section-box p-3 mb-3 text-[12px] text-center themed-muted">
+    ✅ Estoque regular — sem itens críticos
+</div>
+{% endif %}
+
 <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
     <div class="space-y-4">
         <div class="window-panel">
-            <div class="window-title">Resumo Operacional</div>
+            <div class="window-title">Indicadores de Desempenho</div>
             <div class="p-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-[12px]">
-                <div class="section-box kpi-info">
-                    <p class="themed-muted">Produtos em Catálogo</p>
-                    <p class="text-2xl font-bold">{{ total_produtos }}</p>
+                {% for kpi in kpi_variance %}
+                <div class="section-box kpi-{% if kpi.direction == 'up' %}success{% elif kpi.direction == 'down' %}info{% else %}info{% endif %}">
+                    <p class="themed-muted">{{ kpi.label }}</p>
+                    <div class="flex items-end gap-2 mt-1">
+                        <p class="text-2xl font-bold">{{ kpi.current }}</p>
+                        {% if kpi.direction == "up" %}
+                        <span class="text-green-700 text-[11px] font-semibold">↑ {{ kpi.percent }}%</span>
+                        {% elif kpi.direction == "down" %}
+                        <span class="text-red-700 text-[11px] font-semibold">↓ {{ kpi.percent }}%</span>
+                        {% else %}
+                        <span class="themed-muted text-[11px] font-semibold">→ 0%</span>
+                        {% endif %}
+                    </div>
+                    <p class="themed-muted text-[10px] mt-0.5">vs mês anterior: {{ kpi.previous }}</p>
                 </div>
-                <div class="section-box kpi-primary">
-                    <p class="themed-muted">Pedidos Reservados</p>
-                    <p class="text-2xl font-bold">{{ pedidos_reservados }}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="window-panel">
+                <div class="window-title">Consumo Mensal por Secretaria</div>
+                <div class="p-3">
+                    {% if chart_consumo_json != '{}' %}
+                    <canvas id="chart-consumo" data-chart='{{ chart_consumo_json|safe }}' class="w-full" style="max-height: 240px;"></canvas>
+                    {% else %}
+                    <div class="p-6 text-center themed-muted text-[12px]">Sem dados no período</div>
+                    {% endif %}
                 </div>
-                <div class="section-box kpi-success">
-                    <p class="themed-muted">Entregas Realizadas</p>
-                    <p class="text-2xl font-bold">{{ entregas_realizadas }}</p>
+            </div>
+
+            <div class="window-panel">
+                <div class="window-title">Consumo por Categoria</div>
+                <div class="p-3">
+                    {% if chart_categoria_json != '{}' %}
+                    <canvas id="chart-categoria" data-chart='{{ chart_categoria_json|safe }}' class="w-full" style="max-height: 240px;"></canvas>
+                    {% else %}
+                    <div class="p-6 text-center themed-muted text-[12px]">Sem dados no período</div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -122,4 +162,57 @@
         </div>
     </div>
 </div>
+
+<script>
+(function() {
+    var consumoCanvas = document.getElementById('chart-consumo');
+    if (consumoCanvas) {
+        var rawData = consumoCanvas.getAttribute('data-chart');
+        try {
+            var chartData = JSON.parse(rawData);
+            if (chartData.labels && chartData.datasets) {
+                new Chart(consumoCanvas, {
+                    type: 'bar',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                        },
+                        scales: {
+                            x: { stacked: true, ticks: { font: { size: 10 } } },
+                            y: { stacked: true, ticks: { font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+        } catch (e) {}
+    }
+
+    var catCanvas = document.getElementById('chart-categoria');
+    if (catCanvas) {
+        var rawData = catCanvas.getAttribute('data-chart');
+        try {
+            var chartData = JSON.parse(rawData);
+            if (chartData.labels && chartData.data) {
+                new Chart(catCanvas, {
+                    type: 'pie',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{ data: chartData.data }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+        } catch (e) {}
+    }
+})();
+</script>
 {% endblock %}

@@ -22,6 +22,7 @@ urlpatterns = [
     path("produtos/novo/", views.produto_create, name="produto_create"),
     path("produtos/<int:pk>/editar/", views.produto_update, name="produto_update"),
     path("produtos/<int:pk>/excluir/", views.produto_delete, name="produto_delete"),
+    path("produtos/lote-estoque-minimo/", views.produto_lote_estoque, name="produto_lote_estoque"),
     path(
         "api/setores-por-unidade/",
         views.setores_por_unidade,

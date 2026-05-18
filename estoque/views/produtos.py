@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.http import HttpRequest, HttpResponse
 from ._base import (
     render, redirect, get_object_or_404,
@@ -55,4 +57,43 @@ def produto_delete(request: HttpRequest, pk: int) -> HttpResponse:
                 request,
                 "Não foi possível excluir o produto porque ele está vinculado a entradas ou pedidos.",
             )
+    return redirect("produto_list")
+
+
+@_tem_papel("Almoxarife", "Comprador", "Administrador")
+def produto_lote_estoque(request: HttpRequest) -> HttpResponse:
+    if request.method != "POST":
+        return redirect("produto_list")
+
+    ids_str = request.POST.get("ids", "")
+    if not ids_str:
+        messages.warning(request, "Nenhum produto selecionado.")
+        return redirect("produto_list")
+
+    try:
+        ids = [int(x) for x in ids_str.split(",") if x.strip().isdigit()]
+    except (ValueError, TypeError):
+        messages.error(request, "IDs inválidos.")
+        return redirect("produto_list")
+
+    if not ids:
+        messages.warning(request, "Nenhum produto selecionado.")
+        return redirect("produto_list")
+
+    estoque_min_raw = request.POST.get("estoque_minimo", "0")
+    try:
+        novo_minimo = Decimal(estoque_min_raw)
+    except Exception:
+        messages.error(request, "Valor inválido para estoque mínimo.")
+        return redirect("produto_list")
+
+    if novo_minimo < 0:
+        messages.error(request, "Estoque mínimo não pode ser negativo.")
+        return redirect("produto_list")
+
+    atualizados = Produto.objects.filter(pk__in=ids).update(estoque_minimo=novo_minimo)
+    messages.success(
+        request,
+        f"Estoque mínimo atualizado para {atualizados} produto(s).",
+    )
     return redirect("produto_list")

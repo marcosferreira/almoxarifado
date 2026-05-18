@@ -27,6 +27,9 @@
                 <table class="min-w-full text-[11px]">
                     <thead class="themed-table-head uppercase">
                         <tr>
+                            <th class="px-2 py-1 text-center themed-th w-8">
+                                <input type="checkbox" @change="toggleAll($el.checked)" :checked="allChecked">
+                            </th>
                             <th class="px-2 py-1 text-left themed-th w-12">Cód</th>
                             <th class="px-2 py-1 text-left themed-th">Descrição do Material</th>
                             <th class="px-2 py-1 text-left themed-th w-32">Categoria</th>
@@ -40,6 +43,9 @@
                     <tbody>
                         {% for produto in produtos %}
                         <tr class="themed-row cursor-pointer" @click="select('{{ produto.pk }}')" :class="selectedId === '{{ produto.pk }}' ? 'themed-ring' : ''">
+                            <td class="px-2 py-1 themed-td text-center" @click.stop>
+                                <input type="checkbox" value="{{ produto.pk }}" x-model="checkedIds" @change="onCheck">
+                            </td>
                             <td class="px-2 py-1 themed-td">{{ forloop.counter }}</td>
                             <td class="px-2 py-1 themed-td font-semibold themed-strong">{{ produto.nome|upper }}</td>
                             <td class="px-2 py-1 themed-td themed-muted">{{ produto.categoria.nome|upper }}</td>
@@ -47,7 +53,7 @@
                             <td class="px-2 py-1 themed-td text-right {% if produto.estoque_atual < produto.estoque_minimo %}text-red-700 font-bold{% endif %}">{{ produto.estoque_atual }}</td>
                             <td class="px-2 py-1 themed-td text-right text-amber-700">{{ produto.estoque_reservado }}</td>
                             <td class="px-2 py-1 themed-td text-right font-bold" style="color: var(--color-ring);">{{ produto.estoque_disponivel }}</td>
-                            <td class="px-2 py-1 themed-td text-right">
+                            <td class="px-2 py-1 themed-td text-right" @click.stop>
                                 <div class="flex items-center justify-end gap-2 text-[10px]">
                                     <a href="{% url 'produto_update' produto.pk %}" class="font-bold hover:underline" style="color: var(--color-strong);">Editar</a>
                                     <form method="post" action="{% url 'produto_delete' produto.pk %}" onsubmit="return confirm('Confirma exclusão do produto?');">
@@ -59,11 +65,15 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="8" class="px-3 py-8 text-center themed-td themed-muted">Nenhum produto encontrado.</td>
+                            <td colspan="9" class="px-3 py-8 text-center themed-td themed-muted">Nenhum produto encontrado.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+
+            <div class="text-[11px] themed-muted" x-show="checkedIds.length > 0" x-cloak>
+                <span x-text="checkedIds.length"></span> produto(s) selecionado(s)
             </div>
         </div>
 
@@ -72,6 +82,7 @@
             <button type="button" class="action-btn" @click="goToEdit()" :disabled="!selectedId" :class="!selectedId ? 'opacity-60 cursor-not-allowed' : ''">✏ Alterar <span>F3</span></button>
             <button type="button" class="action-btn" @click="submitDelete()" :disabled="!selectedId" :class="!selectedId ? 'opacity-60 cursor-not-allowed' : ''">🗑 Excluir <span>F4</span></button>
             <button type="button" class="action-btn" @click="openModal()">🔍 Consulta <span>F5</span></button>
+            <button type="button" class="action-btn" @click="openLoteModal()" :disabled="checkedIds.length === 0" :class="checkedIds.length === 0 ? 'opacity-60 cursor-not-allowed' : ''">📊 Lote → Est. Mín</button>
             <a :href="selectedId ? '/produtos/' + selectedId + '/ficha-pdf/' : '#'" target="_blank" class="action-btn" :class="!selectedId ? 'opacity-60 cursor-not-allowed' : ''">📄 Ficha PDF <span>F8</span></a>
             <a href="{% url 'dashboard' %}" class="action-btn">🚪 Fechar <span>Esc</span></a>
         </div>
@@ -81,6 +92,7 @@
         </form>
     </div>
 
+    <!-- Consulta Modal -->
     <div x-show="consultaModalOpen" x-cloak class="erp-modal-overlay" @click.self="closeModal()">
         <div class="erp-modal-window max-w-5xl">
             <div class="erp-modal-titlebar">
@@ -109,13 +121,56 @@
             </div>
         </div>
     </div>
+
+    <!-- Lote Estoque Mínimo Modal -->
+    <div x-show="loteModalOpen" x-cloak class="erp-modal-overlay" @click.self="loteModalOpen = false">
+        <div class="erp-modal-window max-w-md">
+            <div class="erp-modal-titlebar">
+                <span>Atualizar Estoque Mínimo em Lote</span>
+                <button type="button" class="action-btn w-auto px-2 py-0.5" @click="loteModalOpen = false">Fechar <span>Esc</span></button>
+            </div>
+            <div class="erp-modal-body space-y-3">
+                <p class="themed-muted"><span x-text="checkedIds.length"></span> produto(s) selecionado(s)</p>
+                <form method="post" action="{% url 'produto_lote_estoque' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="ids" :value="checkedIds.join(',')">
+                    <div>
+                        <label>Novo Estoque Mínimo</label>
+                        <input type="number" name="estoque_minimo" step="0.01" min="0" placeholder="0.00" required>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-3">
+                        <button type="submit" class="action-btn w-auto" style="background: linear-gradient(to bottom, #d8efe3, #b8dfcc); color: #166534; border-color: #86cba8;">
+                            ✅ Aplicar a Selecionados
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
     function produtoListUi() {
         return {
             selectedId: '',
+            checkedIds: [],
             consultaModalOpen: false,
+            loteModalOpen: false,
+            get allChecked() {
+                const checkboxes = document.querySelectorAll('input[x-model="checkedIds"]');
+                return checkboxes.length > 0 && this.checkedIds.length === checkboxes.length;
+            },
+            toggleAll(checked) {
+                if (checked) {
+                    const boxes = document.querySelectorAll('input[x-model="checkedIds"]');
+                    this.checkedIds = Array.from(boxes).map(b => b.value);
+                } else {
+                    this.checkedIds = [];
+                }
+            },
+            onCheck() {
+                // Alpine.js x-model handles the array
+            },
             select(id) {
                 this.selectedId = String(id || '');
             },
@@ -144,6 +199,11 @@
             },
             closeModal() {
                 this.consultaModalOpen = false;
+                this.loteModalOpen = false;
+            },
+            openLoteModal() {
+                if (this.checkedIds.length === 0) return;
+                this.loteModalOpen = true;
             }
         }
     }

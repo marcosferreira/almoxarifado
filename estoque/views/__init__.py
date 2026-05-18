@@ -4,7 +4,13 @@ Re-exporta todas as views para compatibilidade com urls.py.
 """
 from .api import produtos_por_fornecedor, setores_por_unidade
 from .dashboard import dashboard
-from .produtos import produto_list, produto_create, produto_update, produto_delete
+from .produtos import (
+    produto_list,
+    produto_create,
+    produto_update,
+    produto_delete,
+    produto_lote_estoque,
+)
 from .fornecedores import (
     fornecedor_list,
     fornecedor_create,
@@ -41,6 +47,7 @@ __all__ = [
     "produto_create",
     "produto_update",
     "produto_delete",
+    "produto_lote_estoque",
     "fornecedor_list",
     "fornecedor_create",
     "fornecedor_update",

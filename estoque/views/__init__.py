@@ -38,6 +38,7 @@ from .relatorios import (
 )
 from .pdf import pedido_pdf, produto_ficha_pdf
 from .auth import profile
+from .importar_produtos import importar_produtos
 
 __all__ = [
     "produtos_por_fornecedor",
@@ -75,4 +76,5 @@ __all__ = [
     "pedido_pdf",
     "produto_ficha_pdf",
     "profile",
+    "importar_produtos",
 ]

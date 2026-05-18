@@ -67,6 +67,7 @@ urlpatterns = [
     path("relatorios/estoque/", views.relatorio_estoque, name="relatorio_estoque"),
     path("relatorios/pedidos/", views.relatorio_pedidos, name="relatorio_pedidos"),
     path("importar-licitacao/", views.importar_licitacao, name="importar_licitacao"),
+    path("importar-produtos/", views.importar_produtos, name="importar_produtos"),
     # PDF
     path("pedidos/<int:pk>/pdf/", views.pedido_pdf, name="pedido_pdf"),
     path("produtos/<int:pk>/ficha-pdf/", views.produto_ficha_pdf, name="produto_ficha_pdf"),

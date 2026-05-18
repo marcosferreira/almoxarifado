@@ -180,11 +180,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-[1fr_120px_120px_auto] gap-2 items-end">
                         <div>
                             <label>Produto</label>
-                            <select x-model="modalProdutoId" :disabled="!canSelectProdutos()">
+                            <select x-model="modalProdutoId" :disabled="!canSelectProdutos()" x-ref="modalProdutoSelect">
                                 <option value="">Selecione o produto</option>
-                                <template x-for="produto in produtosFornecedor" :key="produto.id">
-                                    <option :value="String(produto.id)" x-text="produto.nome + ' (' + produto.unidade_medida + ')' "></option>
-                                </template>
                             </select>
                         </div>
                         <div>
@@ -396,12 +393,28 @@
                     const data = await response.json();
                     this.produtosFornecedor = data.produtos || [];
                     this.applyProdutosToFormRows(this.produtosFornecedor);
+                    this.atualizarSelectModalProduto(this.produtosFornecedor);
                 } catch (_) {
                     this.produtosFornecedor = [];
                     this.applyProdutosToFormRows([]);
+                    this.atualizarSelectModalProduto([]);
                 } finally {
                     this.isLoadingProdutos = false;
                 }
+            },
+            atualizarSelectModalProduto(produtos) {
+                var select = this.$refs.modalProdutoSelect;
+                if (!select) return;
+                var currentValue = this.modalProdutoId;
+                select.innerHTML = '<option value="">Selecione o produto</option>';
+                produtos.forEach(function (produto) {
+                    var option = document.createElement('option');
+                    option.value = String(produto.id);
+                    option.textContent = produto.nome + ' (' + produto.unidade_medida + ')';
+                    select.appendChild(option);
+                });
+                var hasCurrent = produtos.some(function (p) { return String(p.id) === String(currentValue); });
+                this.modalProdutoId = hasCurrent ? currentValue : '';
             },
             async carregarLicitacoesFornecedor() {
                 this.licitacoesFornecedor = [];

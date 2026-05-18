@@ -2,7 +2,7 @@
 Pacote views do app estoque.
 Re-exporta todas as views para compatibilidade com urls.py.
 """
-from .api import produtos_por_fornecedor, setores_por_unidade
+from .api import produtos_por_fornecedor, setores_por_unidade, licitacoes_por_fornecedor
 from .dashboard import dashboard
 from .produtos import (
     produto_list,
@@ -43,6 +43,7 @@ from .importar_produtos import importar_produtos
 __all__ = [
     "produtos_por_fornecedor",
     "setores_por_unidade",
+    "licitacoes_por_fornecedor",
     "dashboard",
     "produto_list",
     "produto_create",

@@ -3,7 +3,7 @@ from typing import Any
 from django.http import HttpRequest, JsonResponse
 from ._base import (
     login_required,
-    Produto, Setor,
+    Produto, Setor, Entrada, Pedido,
 )
 
 
@@ -19,6 +19,34 @@ def produtos_por_fornecedor(request: HttpRequest) -> JsonResponse:
         for p in produtos
     ]
     return JsonResponse({"produtos": payload})
+
+
+@login_required
+def licitacoes_por_fornecedor(request: HttpRequest) -> JsonResponse:
+    fornecedor_id = request.GET.get("fornecedor_id")
+    if not fornecedor_id:
+        return JsonResponse({"licitacoes": []})
+
+    entradas_qs = (
+        Entrada.objects
+        .filter(fornecedor_id=fornecedor_id)
+        .exclude(licitacao="")
+        .values_list("licitacao", flat=True)
+        .distinct()
+    )
+    pedidos_qs = (
+        Pedido.objects
+        .filter(fornecedor_id=fornecedor_id)
+        .exclude(licitacao="")
+        .values_list("licitacao", flat=True)
+        .distinct()
+    )
+
+    licitacoes = sorted(
+        set(entradas_qs) | set(pedidos_qs),
+        key=lambda v: v,
+    )
+    return JsonResponse({"licitacoes": licitacoes})
 
 
 @login_required

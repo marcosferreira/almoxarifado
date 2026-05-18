@@ -154,6 +154,8 @@
                 </form>
             </div>
 
+            <datalist id="licitacao-suggestions"></datalist>
+
             <div class="w-full xl:w-40 space-y-2">
                 <button type="submit" form="pedido-form" class="action-btn">💾 Salvar <span>F7</span></button>
                 <a href="{% url 'pedido_create' %}" class="action-btn">📄 Incluir <span>F2</span></a>
@@ -289,7 +291,15 @@
             modalPrecoUnitario: '',
             selectedUnidadeId: '',
             isLoadingSetores: false,
+            licitacoesFornecedor: [],
+            isLoadingLicitacoes: false,
             init() {
+                var licitacaoInput = document.getElementById('id_licitacao');
+                if (licitacaoInput) {
+                    licitacaoInput.setAttribute('list', 'licitacao-suggestions');
+                    licitacaoInput.setAttribute('autocomplete', 'off');
+                }
+
                 const fornecedorSelect = document.getElementById('id_fornecedor');
                 if (fornecedorSelect) {
                     this.selectedFornecedorId = fornecedorSelect.value || '';
@@ -297,8 +307,10 @@
                         this.selectedFornecedorId = fornecedorSelect.value || '';
                         this.modalProdutoId = '';
                         this.carregarProdutosFornecedor();
+                        this.carregarLicitacoesFornecedor();
                     });
                     this.carregarProdutosFornecedor();
+                    this.carregarLicitacoesFornecedor();
                 }
 
                 const unidadeSelect = document.getElementById('id_secretaria');
@@ -390,6 +402,43 @@
                 } finally {
                     this.isLoadingProdutos = false;
                 }
+            },
+            async carregarLicitacoesFornecedor() {
+                this.licitacoesFornecedor = [];
+                this.atualizarDatalistLicitacoes([]);
+                if (!this.selectedFornecedorId) {
+                    return;
+                }
+
+                this.isLoadingLicitacoes = true;
+                try {
+                    const response = await fetch(`{% url 'licitacoes_por_fornecedor' %}?fornecedor_id=${encodeURIComponent(this.selectedFornecedorId)}`);
+                    if (!response.ok) {
+                        throw new Error('Falha ao carregar licitações');
+                    }
+                    const data = await response.json();
+                    this.licitacoesFornecedor = data.licitacoes || [];
+                    this.atualizarDatalistLicitacoes(this.licitacoesFornecedor);
+                    var input = document.getElementById('id_licitacao');
+                    if (input && this.licitacoesFornecedor.length === 1 && !input.value) {
+                        input.value = this.licitacoesFornecedor[0];
+                    }
+                } catch (_) {
+                    this.licitacoesFornecedor = [];
+                    this.atualizarDatalistLicitacoes([]);
+                } finally {
+                    this.isLoadingLicitacoes = false;
+                }
+            },
+            atualizarDatalistLicitacoes(licitacoes) {
+                var datalist = document.getElementById('licitacao-suggestions');
+                if (!datalist) return;
+                datalist.innerHTML = '';
+                licitacoes.forEach(function (valor) {
+                    var option = document.createElement('option');
+                    option.value = valor;
+                    datalist.appendChild(option);
+                });
             },
             buildOptionLabel(produto) {
                 return `${produto.nome} (${produto.unidade_medida})`;

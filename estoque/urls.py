@@ -66,6 +66,11 @@ urlpatterns = [
     ),
     path("relatorios/estoque/", views.relatorio_estoque, name="relatorio_estoque"),
     path("relatorios/pedidos/", views.relatorio_pedidos, name="relatorio_pedidos"),
+    path(
+        "api/licitacoes-por-fornecedor/",
+        views.licitacoes_por_fornecedor,
+        name="licitacoes_por_fornecedor",
+    ),
     path("importar-licitacao/", views.importar_licitacao, name="importar_licitacao"),
     path("importar-produtos/", views.importar_produtos, name="importar_produtos"),
     # PDF

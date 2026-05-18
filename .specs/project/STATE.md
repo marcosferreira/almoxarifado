@@ -1,7 +1,7 @@
 # State
 
-**Last Updated:** 2026-05-13T00:00:00-03:00
-**Current Work:** Milestone 2/3/4 — todos os 9 todos implementados e testados
+**Last Updated:** 2026-05-15T00:00:00-03:00
+**Current Work:** Milestone 5 — Dashboard Analytics & Batch Operations implemented
 
 ---
 
@@ -60,6 +60,11 @@ None
 - [x] Implementar importação real de licitação via planilha (substituir placeholder) (Milestone 3)
 - [x] Adicionar testes de signals, views e formulários — 19 testes (Milestone 4)
 - [x] Dividir views.py em pacote views/ por entidade (Milestone 4)
+- [x] Dashboard com gráficos Chart.js (consumo por secretaria, por categoria) + KPIs com variação mensal (Milestone 5)
+- [x] Banner de alerta de estoque crítico no dashboard (Milestone 5)
+- [x] Importação em lote de produtos via planilha XLSX (Milestone 5)
+- [x] Atualização em lote de estoque mínimo via listagem de produtos (Milestone 5)
+- [x] Testes para dashboard, importação de produtos e lote de estoque mínimo — 15 testes (Milestone 5)
 
 ---
 

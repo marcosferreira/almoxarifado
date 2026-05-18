@@ -1,7 +1,7 @@
 # Codebase Concerns
 
 **Analysis Date:** 2026-05-11
-**Last Updated:** 2026-05-14
+**Last Updated:** 2026-05-15
 
 ## Tech Debt
 
@@ -76,7 +76,8 @@
 - What's not tested: All create/update/delete views and their redirect/error behavior
 - Risk: Broken forms, wrong redirects, permission bypass
 - Priority: Medium
+- Progress: Dashboard (5 tests), batch import (7 tests), batch stock min (3 tests), relatorios (5 tests) — good coverage on new features. Produto CRUD (4 tests) covers basics.
 
-### Forms validation
-- What's not tested: Form validation rules, dynamic queryset filtering
+### ~~Forms validation~~ ✅ Resolvido (parcial)
+- What's not tested: Dynamic queryset filtering for Setor/Produto selects
 - Priority: Low

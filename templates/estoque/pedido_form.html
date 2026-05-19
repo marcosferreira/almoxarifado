@@ -77,6 +77,8 @@
             </div>
 
             <div class="window-panel">
+                <p class="px-3 pt-3 text-[11px] text-amber-700 font-semibold" x-show="erroProdutos" x-text="erroProdutos"></p>
+                <p class="px-3 pt-3 text-[11px] themed-muted" x-show="isLoadingProdutos && !erroProdutos">Carregando produtos do fornecedor...</p>
                 <div class="overflow-x-auto themed-table-wrap">
                     {{ formset.management_form }}
                     <table class="min-w-full text-[11px]">
@@ -283,6 +285,7 @@
             selectedFornecedorId: '',
             produtosFornecedor: [],
             isLoadingProdutos: false,
+            erroProdutos: '',
             modalProdutoId: '',
             modalQuantidade: '',
             modalPrecoUnitario: '',
@@ -291,22 +294,42 @@
             licitacoesFornecedor: [],
             isLoadingLicitacoes: false,
             init() {
+                var self = this;
                 var licitacaoInput = document.getElementById('id_licitacao');
                 if (licitacaoInput) {
                     licitacaoInput.setAttribute('list', 'licitacao-suggestions');
                     licitacaoInput.setAttribute('autocomplete', 'off');
                 }
 
+                var originalOptions = new Map();
+                document.querySelectorAll('select[name$="-produto"]').forEach(function (sel) {
+                    originalOptions.set(sel, sel.innerHTML);
+                });
+
                 const fornecedorSelect = document.getElementById('id_fornecedor');
                 if (fornecedorSelect) {
                     this.selectedFornecedorId = fornecedorSelect.value || '';
                     fornecedorSelect.addEventListener('change', () => {
-                        this.selectedFornecedorId = fornecedorSelect.value || '';
-                        this.modalProdutoId = '';
-                        this.carregarProdutosFornecedor();
-                        this.carregarLicitacoesFornecedor();
+                        self.selectedFornecedorId = fornecedorSelect.value || '';
+                        self.modalProdutoId = '';
+                        if (!self.selectedFornecedorId) {
+                            document.querySelectorAll('select[name$="-produto"]').forEach(function (sel) {
+                                var original = originalOptions.get(sel);
+                                if (original !== undefined) {
+                                    sel.innerHTML = original;
+                                }
+                            });
+                            self.produtosFornecedor = [];
+                            self.atualizarSelectModalProduto([]);
+                            self.erroProdutos = '';
+                            return;
+                        }
+                        self.carregarProdutosFornecedor();
+                        self.carregarLicitacoesFornecedor();
                     });
-                    this.carregarProdutosFornecedor();
+                    if (this.selectedFornecedorId) {
+                        this.carregarProdutosFornecedor();
+                    }
                     this.carregarLicitacoesFornecedor();
                 }
 
@@ -378,26 +401,32 @@
                 }
             },
             async carregarProdutosFornecedor() {
-                this.produtosFornecedor = [];
-                this.applyProdutosToFormRows([]);
                 this.atualizarSelectModalProduto([]);
                 if (!this.selectedFornecedorId) {
+                    this.erroProdutos = '';
+                    this.produtosFornecedor = [];
                     return;
                 }
 
+                this.produtosFornecedor = [];
+                this.erroProdutos = '';
                 this.isLoadingProdutos = true;
+                this.applyProdutosToFormRows([], true);
                 try {
-                    const response = await fetch(`{% url 'produtos_por_fornecedor' %}?fornecedor_id=${encodeURIComponent(this.selectedFornecedorId)}`);
+                    var url = `{% url 'produtos_por_fornecedor' %}?fornecedor_id=${encodeURIComponent(this.selectedFornecedorId)}`;
+                    const response = await fetch(url);
                     if (!response.ok) {
-                        throw new Error('Falha ao carregar produtos');
+                        throw new Error('Falha ao carregar produtos (HTTP ' + response.status + ')');
                     }
                     const data = await response.json();
                     this.produtosFornecedor = data.produtos || [];
-                    this.applyProdutosToFormRows(this.produtosFornecedor);
+                    this.applyProdutosToFormRows(this.produtosFornecedor, false);
                     this.atualizarSelectModalProduto(this.produtosFornecedor);
-                } catch (_) {
+                } catch (erro) {
+                    console.error('Erro ao carregar produtos do fornecedor:', erro);
+                    this.erroProdutos = erro.message || 'Erro ao carregar produtos';
                     this.produtosFornecedor = [];
-                    this.applyProdutosToFormRows([]);
+                    this.applyProdutosToFormRows([], false);
                     this.atualizarSelectModalProduto([]);
                 } finally {
                     this.isLoadingProdutos = false;
@@ -457,7 +486,12 @@
             buildOptionLabel(produto) {
                 return `${produto.nome} (${produto.unidade_medida})`;
             },
-            updateSelectOptions(selectEl, produtos) {
+            updateSelectOptions(selectEl, produtos, isLoading) {
+                if (isLoading) {
+                    selectEl.innerHTML = '<option value="">Carregando...</option>';
+                    selectEl.value = '';
+                    return;
+                }
                 const currentValue = selectEl.value;
                 selectEl.innerHTML = '<option value="">---------</option>';
                 produtos.forEach((produto) => {
@@ -469,9 +503,9 @@
                 const hasCurrent = produtos.some((produto) => String(produto.id) === String(currentValue));
                 selectEl.value = hasCurrent ? currentValue : '';
             },
-            applyProdutosToFormRows(produtos) {
+            applyProdutosToFormRows(produtos, isLoading) {
                 document.querySelectorAll('select[name$="-produto"]').forEach((selectEl) => {
-                    this.updateSelectOptions(selectEl, produtos);
+                    this.updateSelectOptions(selectEl, produtos, isLoading);
                 });
             },
             addItemFromModal() {

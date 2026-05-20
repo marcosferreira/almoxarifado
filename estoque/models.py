@@ -140,6 +140,9 @@ class Produto(models.Model):
     unidade_medida = models.CharField(
         max_length=3, choices=UNIDADES_MEDIDA, default="UN"
     )
+    licitacao = models.CharField(
+        max_length=200, blank=True, verbose_name="Licitação/Contrato"
+    )
     estoque_atual = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     estoque_reservado = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     estoque_minimo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -147,6 +150,43 @@ class Produto(models.Model):
     @property
     def estoque_disponivel(self) -> Decimal:
         return self.estoque_atual - self.estoque_reservado
+
+    def fornecedores_entrada(self):
+        if not hasattr(self, "_fornecedores_entrada_cache"):
+            seen = set()
+            result = []
+            for item in self.itementrada_set.all():
+                if item.entrada_id and item.entrada.fornecedor_id:
+                    nome = item.entrada.fornecedor.nome_fantasia
+                    if nome not in seen:
+                        seen.add(nome)
+                        result.append(nome)
+            self._fornecedores_entrada_cache = ", ".join(result)
+        return self._fornecedores_entrada_cache
+
+    def empenhos_entrada(self):
+        if not hasattr(self, "_empenhos_entrada_cache"):
+            seen = set()
+            result = []
+            for item in self.itementrada_set.all():
+                empenho = item.entrada.numero_empenho
+                if empenho and empenho not in seen:
+                    seen.add(empenho)
+                    result.append(empenho)
+            self._empenhos_entrada_cache = ", ".join(result)
+        return self._empenhos_entrada_cache
+
+    def licitacoes_entrada(self):
+        if not hasattr(self, "_licitacoes_entrada_cache"):
+            seen = set()
+            result = []
+            for item in self.itementrada_set.all():
+                licit = item.entrada.licitacao
+                if licit and licit not in seen:
+                    seen.add(licit)
+                    result.append(licit)
+            self._licitacoes_entrada_cache = ", ".join(result)
+        return self._licitacoes_entrada_cache
 
     class Meta:
         verbose_name = "Produto"

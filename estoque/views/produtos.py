@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.db.models import Prefetch
 from django.http import HttpRequest, HttpResponse
 from ._base import (
     render, redirect, get_object_or_404,
@@ -7,12 +8,21 @@ from ._base import (
     login_required, _tem_papel,
     Produto, ProdutoForm,
 )
+from ..models import ItemEntrada
 
 
 @login_required
 def produto_list(request: HttpRequest) -> HttpResponse:
     search = request.GET.get("search", "")
-    produtos = Produto.objects.all()
+    produtos = Produto.objects.prefetch_related(
+        "fornecedores",
+        Prefetch(
+            "itementrada_set",
+            queryset=ItemEntrada.objects.select_related(
+                "entrada__fornecedor"
+            ),
+        ),
+    ).all()
     if search:
         produtos = produtos.filter(nome__icontains=search)
     return render(

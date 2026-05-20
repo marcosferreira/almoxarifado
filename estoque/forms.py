@@ -70,6 +70,7 @@ class ProdutoForm(forms.ModelForm):
             "fornecedores",
             "unidade_medida",
             "estoque_minimo",
+            "licitacao",
         ]
         widgets = {
             "fornecedores": forms.SelectMultiple(attrs={"size": 6}),

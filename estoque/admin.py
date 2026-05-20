@@ -42,6 +42,7 @@ class ProdutoAdmin(admin.ModelAdmin):
     list_display = (
         "nome",
         "categoria",
+        "licitacao",
         "unidade_medida",
         "estoque_atual",
         "estoque_reservado",

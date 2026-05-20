@@ -33,6 +33,9 @@
                             <th class="px-2 py-1 text-left themed-th w-12">Cód</th>
                             <th class="px-2 py-1 text-left themed-th">Descrição do Material</th>
                             <th class="px-2 py-1 text-left themed-th w-32">Categoria</th>
+                            <th class="px-2 py-1 text-left themed-th w-32">Fornecedor</th>
+                            <th class="px-2 py-1 text-left themed-th w-28">Licitação/Contrato</th>
+                            <th class="px-2 py-1 text-left themed-th w-24">Num. Empenho</th>
                             <th class="px-2 py-1 text-center themed-th w-16">Unid</th>
                             <th class="px-2 py-1 text-right themed-th w-24">Físico</th>
                             <th class="px-2 py-1 text-right themed-th w-24">Reserva</th>
@@ -49,6 +52,9 @@
                             <td class="px-2 py-1 themed-td">{{ forloop.counter }}</td>
                             <td class="px-2 py-1 themed-td font-semibold themed-strong">{{ produto.nome|upper }}</td>
                             <td class="px-2 py-1 themed-td themed-muted">{{ produto.categoria.nome|upper }}</td>
+                            <td class="px-2 py-1 themed-td themed-muted text-[10px]">{{ produto.fornecedores_entrada }}</td>
+                            <td class="px-2 py-1 themed-td themed-muted text-[10px]">{{ produto.licitacoes_entrada }}</td>
+                            <td class="px-2 py-1 themed-td themed-muted text-[10px]">{{ produto.empenhos_entrada }}</td>
                             <td class="px-2 py-1 themed-td text-center">{{ produto.unidade_medida }}</td>
                             <td class="px-2 py-1 themed-td text-right {% if produto.estoque_atual < produto.estoque_minimo %}text-red-700 font-bold{% endif %}">{{ produto.estoque_atual }}</td>
                             <td class="px-2 py-1 themed-td text-right text-amber-700">{{ produto.estoque_reservado }}</td>
@@ -65,7 +71,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="9" class="px-3 py-8 text-center themed-td themed-muted">Nenhum produto encontrado.</td>
+                            <td colspan="12" class="px-3 py-8 text-center themed-td themed-muted">Nenhum produto encontrado.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

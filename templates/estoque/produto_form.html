@@ -42,6 +42,11 @@
                             {{ form.estoque_minimo }}
                             {% if form.estoque_minimo.errors %}<p class="text-[11px] text-red-700 mt-1">{{ form.estoque_minimo.errors.0 }}</p>{% endif %}
                         </div>
+                        <div class="md:col-span-2">
+                            <label>{{ form.licitacao.label }}</label>
+                            {{ form.licitacao }}
+                            {% if form.licitacao.errors %}<p class="text-[11px] text-red-700 mt-1">{{ form.licitacao.errors.0 }}</p>{% endif %}
+                        </div>
                     </div>
                 </div>
             </form>

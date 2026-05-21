@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.db.models import Q
 from django.http import HttpRequest, JsonResponse
 from ._base import (
     login_required,
@@ -13,7 +14,10 @@ def produtos_por_fornecedor(request: HttpRequest) -> JsonResponse:
     if not fornecedor_id:
         return JsonResponse({"produtos": []})
 
-    produtos = Produto.objects.filter(fornecedores__id=fornecedor_id).order_by("nome")
+    produtos = Produto.objects.filter(
+        Q(fornecedores__id=fornecedor_id)
+        | Q(itementrada__entrada__fornecedor_id=fornecedor_id)
+    ).distinct().order_by("nome")
     payload = [
         {"id": p.id, "nome": p.nome, "unidade_medida": p.unidade_medida}
         for p in produtos

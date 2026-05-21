@@ -79,6 +79,7 @@
             <div class="window-panel">
                 <p class="px-3 pt-3 text-[11px] text-amber-700 font-semibold" x-show="erroProdutos" x-text="erroProdutos"></p>
                 <p class="px-3 pt-3 text-[11px] themed-muted" x-show="isLoadingProdutos && !erroProdutos">Carregando produtos do fornecedor...</p>
+                <p class="px-3 pt-3 text-[11px] text-amber-700" x-show="!isLoadingProdutos && selectedFornecedorId && produtosFornecedor.length === 0">Nenhum produto encontrado para este fornecedor.</p>
                 <div class="overflow-x-auto themed-table-wrap">
                     {{ formset.management_form }}
                     <table class="min-w-full text-[11px]">
@@ -301,11 +302,6 @@
                     licitacaoInput.setAttribute('autocomplete', 'off');
                 }
 
-                var originalOptions = new Map();
-                document.querySelectorAll('select[name$="-produto"]').forEach(function (sel) {
-                    originalOptions.set(sel, sel.innerHTML);
-                });
-
                 const fornecedorSelect = document.getElementById('id_fornecedor');
                 if (fornecedorSelect) {
                     this.selectedFornecedorId = fornecedorSelect.value || '';
@@ -313,15 +309,11 @@
                         self.selectedFornecedorId = fornecedorSelect.value || '';
                         self.modalProdutoId = '';
                         if (!self.selectedFornecedorId) {
-                            document.querySelectorAll('select[name$="-produto"]').forEach(function (sel) {
-                                var original = originalOptions.get(sel);
-                                if (original !== undefined) {
-                                    sel.innerHTML = original;
-                                }
-                            });
                             self.produtosFornecedor = [];
                             self.atualizarSelectModalProduto([]);
                             self.erroProdutos = '';
+                            self.applyProdutosToFormRows([], false);
+                            self.carregarLicitacoesFornecedor();
                             return;
                         }
                         self.carregarProdutosFornecedor();
@@ -329,6 +321,8 @@
                     });
                     if (this.selectedFornecedorId) {
                         this.carregarProdutosFornecedor();
+                    } else {
+                        this.applyProdutosToFormRows([], false);
                     }
                     this.carregarLicitacoesFornecedor();
                 }

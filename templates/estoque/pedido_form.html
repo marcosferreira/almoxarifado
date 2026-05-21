@@ -213,7 +213,16 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <template x-for="(item, index) in itensPendentesModal" :key="item.uid">
                             <tr>
+                                <td class="px-2 py-1 themed-td" x-text="index + 1"></td>
+                                <td class="px-2 py-1 themed-td" x-text="item.descricao"></td>
+                                <td class="px-2 py-1 themed-td text-right" x-text="Number(item.quantidade || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0 })"></td>
+                                <td class="px-2 py-1 themed-td text-right" x-text="Number(item.preco_unitario || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })"></td>
+                                <td class="px-2 py-1 themed-td text-right" x-text="Number((item.quantidade || 0) * (item.preco_unitario || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })"></td>
+                            </tr>
+                            </template>
+                            <tr x-show="itensPendentesModal.length === 0">
                                 <td colspan="5" class="px-2 py-6 themed-td text-center themed-muted">Use os campos acima para inserir novos itens no pedido.</td>
                             </tr>
                         </tbody>
@@ -293,6 +302,7 @@
             modalProdutoId: '',
             modalQuantidade: '',
             modalPrecoUnitario: '',
+            itensPendentesModal: [],
             selectedUnidadeId: '',
             isLoadingSetores: false,
             licitacoesFornecedor: [],
@@ -660,6 +670,7 @@
                 });
             },
             closeItensModalAndKeepList() {
+                this.transferirItensPendentesParaFormulario();
                 this.itensModalOpen = false;
             },
             getFormsetTotalInput() {
@@ -740,42 +751,29 @@
                 return novaLinha;
             },
             addItemFromModal() {
-                if (!this.modalProdutoId) {
-                    return;
-                }
-
-                const row = this.getAvailableItemRow();
-
-                if (!row) {
+                if (!this.modalProdutoId || !this.modalQuantidade) {
                     return;
                 }
 
                 const produtoSelecionado = this.buscarProdutoPorId(this.modalProdutoId);
+                if (!produtoSelecionado) {
+                    return;
+                }
+
+                const quantidade = parseInt(String(this.modalQuantidade || '0'), 10);
+                if (!quantidade || quantidade < 1) {
+                    return;
+                }
+
                 const precoModal = this.modalPrecoUnitario || this.formatarPrecoParaInput(produtoSelecionado?.preco_unitario);
-
-                const produtoSelect = row.querySelector('select[name$="-produto"]');
-                const quantidadeInput = row.querySelector('input[name$="-quantidade"]');
-                const quantidadeLicitadaInput = row.querySelector('input[name$="-quantidade_licitada"]');
-                const precoInput = row.querySelector('input[name$="-preco_unitario"]');
-
-                if (produtoSelect) {
-                    produtoSelect.value = String(this.modalProdutoId);
-                    produtoSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-                if (quantidadeInput) {
-                    quantidadeInput.value = this.modalQuantidade || '';
-                    quantidadeInput.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-                if (quantidadeLicitadaInput && !quantidadeLicitadaInput.value) {
-                    quantidadeLicitadaInput.value = this.modalQuantidade || '';
-                    quantidadeLicitadaInput.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-                if (precoInput) {
-                    precoInput.value = precoModal || '';
-                    precoInput.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-
-                this.aplicarPrecoProdutoNaLinha(row, true);
+                const precoNumero = this.parsePreco(precoModal) || 0;
+                this.itensPendentesModal.push({
+                    uid: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                    produto_id: String(this.modalProdutoId),
+                    quantidade,
+                    preco_unitario: precoNumero,
+                    descricao: this.buildOptionLabel(produtoSelecionado),
+                });
 
                 this.modalProdutoId = '';
                 this.modalQuantidade = '';
@@ -785,6 +783,55 @@
                 if (modalSelect) {
                     modalSelect.focus();
                 }
+            },
+            transferirItensPendentesParaFormulario() {
+                if (!this.itensPendentesModal.length) {
+                    return;
+                }
+
+                this.itensPendentesModal.forEach((item) => {
+                    this.adicionarItemNoFormulario(item);
+                });
+
+                this.itensPendentesModal = [];
+            },
+            adicionarItemNoFormulario(item) {
+                if (!item || !item.produto_id) {
+                    return;
+                }
+
+                const row = this.getAvailableItemRow();
+
+                if (!row) {
+                    return;
+                }
+
+                const produtoSelecionado = this.buscarProdutoPorId(item.produto_id);
+                const precoModal = this.formatarPrecoParaInput(item.preco_unitario || produtoSelecionado?.preco_unitario);
+
+                const produtoSelect = row.querySelector('select[name$="-produto"]');
+                const quantidadeInput = row.querySelector('input[name$="-quantidade"]');
+                const quantidadeLicitadaInput = row.querySelector('input[name$="-quantidade_licitada"]');
+                const precoInput = row.querySelector('input[name$="-preco_unitario"]');
+
+                if (produtoSelect) {
+                    produtoSelect.value = String(item.produto_id);
+                    produtoSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                if (quantidadeInput) {
+                    quantidadeInput.value = item.quantidade || '';
+                    quantidadeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                if (quantidadeLicitadaInput && !quantidadeLicitadaInput.value) {
+                    quantidadeLicitadaInput.value = item.quantidade || '';
+                    quantidadeLicitadaInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                if (precoInput) {
+                    precoInput.value = precoModal || '';
+                    precoInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+
+                this.aplicarPrecoProdutoNaLinha(row, true);
             },
             numBySuffix(tr, suffix) {
                 const input = tr.querySelector(`input[name$="-${suffix}"]`);

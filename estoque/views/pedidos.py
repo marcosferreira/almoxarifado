@@ -3,7 +3,7 @@ from ._base import (
     render, redirect, get_object_or_404,
     messages, Decimal,
     login_required, _tem_papel, _to_decimal,
-    Pedido, PedidoForm, ItemPedidoFormSet, AnexoEmpenhoForm,
+    Pedido, PedidoForm, ItemPedidoFormSet, AnexoEmpenhoForm, ItemEntrada,
 )
 
 
@@ -26,19 +26,63 @@ def pedido_list(request: HttpRequest) -> HttpResponse:
 
 @_tem_papel("Almoxarife", "Comprador", "Solicitante", "Administrador")
 def pedido_create(request: HttpRequest) -> HttpResponse:
+    pode_editar_preco_unitario = (
+        request.user.is_superuser
+        or request.user.groups.filter(name="Administrador").exists()
+    )
+
+    def _preco_recente_fornecedor_produto(fornecedor_id: int, produto_id: int):
+        return (
+            ItemEntrada.objects.filter(
+                entrada__fornecedor_id=fornecedor_id,
+                produto_id=produto_id,
+            )
+            .order_by("-entrada__data_entrada", "-id")
+            .values_list("preco_unitario", flat=True)
+            .first()
+        )
+
     pedido_form = PedidoForm(request.POST or None)
     formset = ItemPedidoFormSet(request.POST or None)
+
+    if not pode_editar_preco_unitario:
+        for item_form in formset.forms:
+            if "preco_unitario" in item_form.fields:
+                item_form.fields["preco_unitario"].widget.attrs["readonly"] = "readonly"
+            if "quantidade_licitada" in item_form.fields:
+                item_form.fields["quantidade_licitada"].widget.attrs["readonly"] = "readonly"
+
     if request.method == "POST":
         if pedido_form.is_valid() and formset.is_valid():
             pedido = pedido_form.save()
             formset.instance = pedido
+
+            if not pode_editar_preco_unitario:
+                for item_form in formset.forms:
+                    cleaned = item_form.cleaned_data
+                    if not cleaned or cleaned.get("DELETE"):
+                        continue
+                    produto = cleaned.get("produto")
+                    if not produto:
+                        continue
+                    preco_base = _preco_recente_fornecedor_produto(
+                        pedido.fornecedor_id,
+                        produto.id,
+                    ) if pedido.fornecedor_id else None
+                    item_form.instance.preco_unitario = preco_base if preco_base is not None else Decimal("0")
+                    item_form.instance.quantidade_licitada = item_form.instance.quantidade
+
             formset.save()
             messages.success(request, "Pedido solicitado com sucesso!")
             return redirect("pedido_list")
     return render(
         request,
         "estoque/pedido_form.html",
-        {"pedido_form": pedido_form, "formset": formset},
+        {
+            "pedido_form": pedido_form,
+            "formset": formset,
+            "pode_editar_preco_unitario": pode_editar_preco_unitario,
+        },
     )
 
 

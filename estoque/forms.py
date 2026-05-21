@@ -1,6 +1,7 @@
 from typing import Any
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from .models import (
     Produto,
@@ -134,6 +135,25 @@ class PedidoForm(_DynamicSetorFilterMixin, forms.ModelForm):
 
 
 class ItemPedidoForm(forms.ModelForm):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields["quantidade"].widget.attrs.update({"step": "1", "inputmode": "numeric"})
+        self.fields["quantidade_atendida"].widget.attrs.update({"step": "1", "inputmode": "numeric"})
+
+    def _validar_inteiro(self, nome_campo: str):
+        valor = self.cleaned_data.get(nome_campo)
+        if valor is None:
+            return valor
+        if valor != valor.to_integral_value():
+            raise ValidationError("Informe um número inteiro.")
+        return valor
+
+    def clean_quantidade(self):
+        return self._validar_inteiro("quantidade")
+
+    def clean_quantidade_atendida(self):
+        return self._validar_inteiro("quantidade_atendida")
+
     class Meta:
         model = ItemPedido
         fields = [

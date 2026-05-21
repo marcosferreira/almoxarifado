@@ -1,10 +1,10 @@
 from typing import Any
 
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Subquery, DecimalField
 from django.http import HttpRequest, JsonResponse
 from ._base import (
     login_required,
-    Produto, Setor, Entrada, Pedido,
+    Produto, Setor, Entrada, Pedido, ItemEntrada,
 )
 
 
@@ -14,12 +14,31 @@ def produtos_por_fornecedor(request: HttpRequest) -> JsonResponse:
     if not fornecedor_id:
         return JsonResponse({"produtos": []})
 
+    preco_unitario_subquery = (
+        ItemEntrada.objects.filter(
+            produto_id=OuterRef("pk"),
+            entrada__fornecedor_id=fornecedor_id,
+        )
+        .order_by("-entrada__data_entrada", "-id")
+        .values("preco_unitario")[:1]
+    )
+
     produtos = Produto.objects.filter(
         Q(fornecedores__id=fornecedor_id)
         | Q(itementrada__entrada__fornecedor_id=fornecedor_id)
+    ).annotate(
+        preco_unitario=Subquery(
+            preco_unitario_subquery,
+            output_field=DecimalField(max_digits=10, decimal_places=2),
+        )
     ).distinct().order_by("nome")
     payload = [
-        {"id": p.id, "nome": p.nome, "unidade_medida": p.unidade_medida}
+        {
+            "id": p.id,
+            "nome": p.nome,
+            "unidade_medida": p.unidade_medida,
+            "preco_unitario": str(p.preco_unitario) if p.preco_unitario is not None else "",
+        }
         for p in produtos
     ]
     return JsonResponse({"produtos": payload})
